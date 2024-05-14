@@ -123,14 +123,14 @@
 
             <TextView
                 android:id="@+id/dateStartTv"
-                android:layout_width="146dp"
+                android:layout_width="160dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Monday, Mar 4"
                 android:textAlignment="textEnd"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:layout_marginStart="32dp"/>
+                android:layout_marginStart="17dp"/>
 
             <TextView
                 android:id="@+id/timeStartTv"
@@ -161,14 +161,14 @@
 
                 <TextView
                     android:id="@+id/dateEndTv"
-                    android:layout_width="146dp"
+                    android:layout_width="160dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="Monday, Mar 4"
                     android:textAlignment="textEnd"
                     android:textColor="@color/black"
                     android:textSize="18sp"
-                    android:layout_marginStart="32dp"/>
+                    android:layout_marginStart="18dp"/>
 
                 <TextView
                     android:id="@+id/timeEndTv"

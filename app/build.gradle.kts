@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.chaquo.python")
 }
 
 android {
@@ -15,6 +16,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            // On Apple silicon, you can omit x86_64.
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -36,8 +42,25 @@ android {
     }
 }
 
-dependencies {
+chaquopy {
+    defaultConfig {
+        buildPython("C:/Users/Joshua/AppData/Local/Programs/Python/Python311/python.exe")
+        version = "3.11"
 
+        pip {
+            install("pydantic<2")
+            install("openai")
+        }
+    }
+    productFlavors { }
+    sourceSets {
+        getByName("main") {
+            srcDir("src/main/python")
+        }
+    }
+}
+
+dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")

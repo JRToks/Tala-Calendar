@@ -9,14 +9,20 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
+import com.chaquo.python.android.AndroidPlatform;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +34,8 @@ public class ActivityAI extends AppCompatActivity{
     private ImageButton btnSend;
     private List<Message> messageList;
     private MessageAdapter messageAdapter;
+    private Python py;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +46,12 @@ public class ActivityAI extends AppCompatActivity{
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
+
+        if (!Python.isStarted()) {
+            Python.start(new AndroidPlatform(this));
+        }
+
+        py = Python.getInstance();
 
         gestureDetector = new GestureDetector(this, new SwipeGestureListener());
 
@@ -77,36 +91,17 @@ public class ActivityAI extends AppCompatActivity{
         });
     }
 
-    //addresponse function sent by bot
+    //add response function sent by bot
     private void addResponse(String response){
         messageList.remove(messageList.size()-1);
         addToChat(response, Message.SENT_BY_BOT);
     }
 
-    //calling api using http dependency TODO: placeholder function codes
     private void CallAPI(String question){
         messageList.add(new Message("Typing...", Message.SENT_BY_BOT));
-        //handler used to showcase the typing text - is temporary
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                addResponse("Hi! I am Cali. Your friendly neighborhood spidergirl!");
-            }
-        }, 2000);
-//        JSONObject jsonObject = new JSONObject();
-//        try {
-//            jsonObject.put("model", "gpt-3.5-turbo-0125");
-//            JSONArray messageArr = new JSONArray();
-//            JSONObject obj = new JSONObject();
-//            obj.put("role", "user");
-//            obj.put("content", "question");
-//            messageArr.put(obj);
-//
-//            jsonObject.put("message", messageArr);
-//        }catch (JSONException e){
-//            throw new RuntimeException(e);
-//        }
+        PyObject module = py.getModule("AIHelper");
+        PyObject myFnCallVale = module.get("get_response");
+        addResponse(myFnCallVale.call(question).toString());
     }
 
     @Override
@@ -130,6 +125,9 @@ public class ActivityAI extends AppCompatActivity{
                 float diffY = e2.getY() - e1.getY();
                 if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
                     if (diffY > 0) {
+                        PyObject module = py.getModule("AIHelper");
+                        PyObject delete_thread = module.get("delete_thread");
+                        delete_thread.call();
                         finish();
                         overridePendingTransition(0,R.anim.slide_down_anim);
                     }
