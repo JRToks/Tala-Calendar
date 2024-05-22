@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Tala.db";
@@ -218,6 +219,49 @@ public class DBHelper extends SQLiteOpenHelper {
         String[] selectionArgs = {String.valueOf(userId), String.valueOf(eventId)};
         return db.query(TABLE_EVENTS, projection, selection, selectionArgs, null, null, null);
     }
+
+    public Cursor searchEvent(int userId, String title, String startDate, String endDate, String startTime, String endTime) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + COLUMN_USER_ID + " = ?";
+        ArrayList<String> selectionArgsList = new ArrayList<>();
+        selectionArgsList.add(String.valueOf(userId));
+
+        if (title != null && !title.isEmpty()) {
+            query += " AND " + COLUMN_EVENT_TITLE + " LIKE ?";
+            selectionArgsList.add("%" + title + "%");
+        }
+
+        if (startDate != null && endDate != null) {
+            query += " AND (" + COLUMN_START_DATE + " BETWEEN ? AND ? OR " + COLUMN_END_DATE + " BETWEEN ? AND ?)";
+            String startDateString = startDate.toString();
+            String endDateString = endDate.toString();
+            selectionArgsList.add(startDateString);
+            selectionArgsList.add(endDateString);
+            selectionArgsList.add(startDateString);
+            selectionArgsList.add(endDateString);
+        }
+
+        if (startTime != null && endTime != null) {
+            query += " AND (" + COLUMN_START_TIME + " BETWEEN ? AND ? OR " + COLUMN_END_TIME + " BETWEEN ? AND ?)";
+            String startTimeString = startTime.toString();
+            String endTimeString = endTime.toString();
+            selectionArgsList.add(startTimeString);
+            selectionArgsList.add(endTimeString);
+            selectionArgsList.add(startTimeString);
+            selectionArgsList.add(endTimeString);
+        }
+
+        // Convert selectionArgsList to an array
+        String[] selectionArgs = selectionArgsList.toArray(new String[0]);
+
+        // Execute the query
+        Cursor cursor = db.rawQuery(query, selectionArgs);
+
+        // Return the cursor
+        return cursor;
+    }
+
 
     public boolean deleteEventData(int userId, int eventId) {
         SQLiteDatabase db = this.getWritableDatabase();

@@ -1,30 +1,26 @@
 package com.codex.tala;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chaquo.python.PyObject;
-import com.chaquo.python.Python;
-import com.chaquo.python.android.AndroidPlatform;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 public class ActivityAI extends AppCompatActivity{
     private GestureDetector gestureDetector;
@@ -34,7 +30,10 @@ public class ActivityAI extends AppCompatActivity{
     private ImageButton btnSend;
     private List<Message> messageList;
     private MessageAdapter messageAdapter;
-    private Python py;
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final AIHelper aiHelper = new AIHelper(this);
+
+    private int userId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,11 +46,7 @@ public class ActivityAI extends AppCompatActivity{
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
 
-        if (!Python.isStarted()) {
-            Python.start(new AndroidPlatform(this));
-        }
-
-        py = Python.getInstance();
+        userId = getIntent().getIntExtra("userId", -1);
 
         gestureDetector = new GestureDetector(this, new SwipeGestureListener());
 
@@ -74,7 +69,8 @@ public class ActivityAI extends AppCompatActivity{
                 String question = edtMessage.getText().toString().trim();
                 addToChat(question, Message.SENT_BY_ME);
                 edtMessage.setText("");
-                CallAPI(question);
+                edtMessage.setClickable(false);
+                CallNLP(question);
                 txtWelcome.setVisibility(View.GONE);
             }
         });
@@ -97,11 +93,19 @@ public class ActivityAI extends AppCompatActivity{
         addToChat(response, Message.SENT_BY_BOT);
     }
 
-    private void CallAPI(String question){
+    private void CallNLP(String question){
         messageList.add(new Message("Typing...", Message.SENT_BY_BOT));
-        PyObject module = py.getModule("AIHelper");
-        PyObject myFnCallVale = module.get("get_response");
-        addResponse(myFnCallVale.call(question).toString());
+        Disposable disposable = aiHelper.executeSimpleChat(question, userId)
+                .subscribe(result -> addResponse(result),
+                        throwable -> Log.e("simpleChat", "Error: " + throwable.getMessage(), throwable));
+        compositeDisposable.add(disposable);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
+        aiHelper.deleteThread().observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
@@ -125,9 +129,6 @@ public class ActivityAI extends AppCompatActivity{
                 float diffY = e2.getY() - e1.getY();
                 if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
                     if (diffY > 0) {
-                        PyObject module = py.getModule("AIHelper");
-                        PyObject delete_thread = module.get("delete_thread");
-                        delete_thread.call();
                         finish();
                         overridePendingTransition(0,R.anim.slide_down_anim);
                     }

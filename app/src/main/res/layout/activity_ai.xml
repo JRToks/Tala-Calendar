@@ -31,7 +31,7 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:src="@drawable/talalogo"
-                tools:ignore="ContentDescription"/>
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -40,7 +40,7 @@
                 android:fontFamily="@font/bebas"
                 android:text="caligpt"
                 android:textColor="@color/color_main_darkcyan"
-                android:textSize="38sp"/>
+                android:textSize="38sp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -52,7 +52,7 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleLayout"/>
+        app:layout_constraintTop_toBottomOf="@id/titleLayout" />
 
     <TextView
         android:id="@+id/txtWelcome"
@@ -62,7 +62,7 @@
         android:text="What can I do for you?"
         android:textColor="@color/black"
         android:textSize="30sp"
-        app:layout_constraintBottom_toBottomOf="@+id/chat_rv"
+        app:layout_constraintBottom_toBottomOf="@id/chat_rv"
         app:layout_constraintEnd_toEndOf="@id/chat_rv"
         app:layout_constraintStart_toStartOf="@id/chat_rv"
         app:layout_constraintTop_toTopOf="@id/chat_rv" />
@@ -90,7 +90,7 @@
             android:inputType="text"
             android:textColor="@color/black"
             android:textIsSelectable="true"
-            tools:ignore="Autofill"/>
+            tools:ignore="Autofill" />
 
         <ImageButton
             android:id="@+id/send_btn"
@@ -100,7 +100,7 @@
             android:layout_gravity="center"
             android:src="@drawable/baseline_send_24"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="@color/light_blue"/>
+            app:tint="@color/light_blue" />
 
     </LinearLayout>
 

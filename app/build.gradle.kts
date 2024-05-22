@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.chaquo.python")
 }
 
 android {
@@ -16,11 +15,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-        ndk {
-            // On Apple silicon, you can omit x86_64.
-            abiFilters += listOf("arm64-v8a", "x86_64")
-        }
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -31,10 +29,24 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            // Use the debug API key for debug builds
+            buildConfigField("String", "OPENAI_API_KEY", "\"${project.property("OPENAI_API_KEY")}\"")
+        }
+        release {
+            // Use the release API key for release builds
+            buildConfigField("String", "OPENAI_API_KEY", "\"${project.property("OPENAI_API_KEY")}\"")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    packaging{
+        resources.excludes.add("META-INF/LICENSE-notice.md")
+        resources.excludes.add("META-INF/LICENSE.md")
+        resources.excludes.add("META-INF/COPYRIGHT")
     }
 
     kotlinOptions {
@@ -42,25 +54,12 @@ android {
     }
 }
 
-chaquopy {
-    defaultConfig {
-        buildPython("C:/Users/Joshua/AppData/Local/Programs/Python/Python311/python.exe")
-        version = "3.11"
-
-        pip {
-            install("pydantic<2")
-            install("openai")
-        }
-    }
-    productFlavors { }
-    sourceSets {
-        getByName("main") {
-            srcDir("src/main/python")
-        }
-    }
-}
-
 dependencies {
+    implementation("io.github.lambdua:api:0.20.7")
+    implementation("io.github.lambdua:client:0.20.7")
+    implementation("io.github.lambdua:service:0.20.7")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")

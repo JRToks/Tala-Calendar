@@ -126,6 +126,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 FAB.onButtonClicked();
                 Intent intent = new Intent(ActivityMain.this, ActivityAI.class);
+                intent.putExtra("userId", userId);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_up_anim,0);
             }
