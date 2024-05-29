@@ -6,22 +6,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-// Test Demo for QLearning Algorithm inside Calendar/Text File calendar datas
+// Test Demo for QLearning Algorithm
 // Not Fully Implemented Yet
-// Debugging
 public class QLearning {
-
     private final double alpha = 0.1; // Learning rate
     private final double gamma = 0.9; // Eagerness - 0 looks in the near future, 1 looks in the distant future
 
-    private final int CalWidth = 3;
-    private final int CalHeight = 3;
-    private final int statesCount = CalHeight * CalWidth;
+    private final int daysInWeek = 7;
+    private final int hoursInDay = 24;
+    private final int statesCount = hoursInDay * daysInWeek;
 
     private final int reward = 100;
     private final int penalty = -10;
 
-    private char[][] cal; // event data read from file
+    private char[][] cal;
     private int[][] R; // Reward lookup
     private double[][] Q; // Q learning
 
@@ -40,7 +38,7 @@ public class QLearning {
 
         R = new int[statesCount][statesCount];
         Q = new double[statesCount][statesCount];
-        cal = new char[CalHeight][CalWidth];
+        cal = new char[hoursInDay][daysInWeek];
 
 
         try (FileInputStream fis = new FileInputStream(file)) {
@@ -50,7 +48,6 @@ public class QLearning {
 
             int content;
 
-            // Read the maze from the input file
             while ((content = fis.read()) != -1) {
                 char c = (char) content;
                 if (c != '0' && c != 'F' && c != 'X') {
@@ -58,7 +55,7 @@ public class QLearning {
                 }
                 cal[i][j] = c;
                 j++;
-                if (j == CalWidth) {
+                if (j == daysInWeek) {
                     j = 0;
                     i++;
                 }
@@ -67,10 +64,10 @@ public class QLearning {
             // navigate through the reward matrix R using k index
             for (int k = 0; k < statesCount; k++) {
 
-                // navigate with i and j through the maze, so we need
+                // navigate with i and j through the events, so we need
                 // to translate k into i and j
-                i = k / CalWidth;
-                j = k - i * CalWidth;
+                i = k / daysInWeek;
+                j = k - i * daysInWeek;
 
                 // fill in the reward matrix with -1
                 for (int s = 0; s < statesCount; s++) {
@@ -81,7 +78,7 @@ public class QLearning {
                 if (cal[i][j] != 'F') {
                     int goLeft = j - 1;
                     if (goLeft >= 0) {
-                        int target = i * CalWidth + goLeft;
+                        int target = i * daysInWeek + goLeft;
                         if (cal[i][goLeft] == '0') {
                             R[k][target] = 0;
                         } else if (cal[i][goLeft] == 'F') {
@@ -92,8 +89,8 @@ public class QLearning {
                     }
 
                     int goRight = j + 1;
-                    if (goRight < CalWidth) {
-                        int target = i * CalWidth + goRight;
+                    if (goRight < daysInWeek) {
+                        int target = i * daysInWeek + goRight;
                         if (cal[i][goRight] == '0') {
                             R[k][target] = 0;
                         } else if (cal[i][goRight] == 'F') {
@@ -105,7 +102,7 @@ public class QLearning {
 
                     int goUp = i - 1;
                     if (goUp >= 0) {
-                        int target = goUp * CalWidth + j;
+                        int target = goUp * daysInWeek + j;
                         if (cal[goUp][j] == '0') {
                             R[k][target] = 0;
                         } else if (cal[goUp][j] == 'F') {
@@ -116,8 +113,8 @@ public class QLearning {
                     }
 
                     int goDown = i + 1;
-                    if (goDown < CalHeight) {
-                        int target = goDown * CalWidth + j;
+                    if (goDown < hoursInDay) {
+                        int target = goDown * daysInWeek + j;
                         if (cal[goDown][j] == '0') {
                             R[k][target] = 0;
                         } else if (cal[goDown][j] == 'F') {
@@ -188,8 +185,8 @@ public class QLearning {
     }
 
     boolean isFinalState(int state) {
-        int i = state / CalWidth;
-        int j = state - i * CalWidth;
+        int i = state / daysInWeek;
+        int j = state - i * daysInWeek;
 
         return cal[i][j] == 'F';
     }

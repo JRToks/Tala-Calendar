@@ -129,6 +129,7 @@ public class ActivityAI extends AppCompatActivity{
                 float diffY = e2.getY() - e1.getY();
                 if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
                     if (diffY > 0) {
+
                         finish();
                         overridePendingTransition(0,R.anim.slide_down_anim);
                     }

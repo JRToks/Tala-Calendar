@@ -34,10 +34,10 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class AIHelper {
+    private final OpenAiService service = new OpenAiService(BuildConfig.OPENAI_API_KEY);
     private final String assistantId = "asst_2ahlqVcUrk7KK6G8PlT3vWOi";
     private final DBHelper db;
     public static Thread thread;
-    private final OpenAiService service = new OpenAiService(BuildConfig.OPENAI_API_KEY);
 
     public AIHelper(Context context){
         this.db = new DBHelper(context);
@@ -59,87 +59,76 @@ public class AIHelper {
             RunCreateRequest runCreateRequest = RunCreateRequest.builder().assistantId(assistantId).build();
 
             Run run = service.createRun(threadId, runCreateRequest);
+
+            //bro
             Run retrievedRun = service.retrieveRun(threadId, run.getId());
 
-            while (!(retrievedRun.getStatus().equals("completed"))
-                    && !(retrievedRun.getStatus().equals("failed"))
-                    && !(retrievedRun.getStatus().equals("expired"))
-                    && !(retrievedRun.getStatus().equals("incomplete"))
-                    && !(retrievedRun.getStatus().equals("requires_action"))) {
-                try {
-                    java.lang.Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                retrievedRun = service.retrieveRun(threadId, run.getId());
-            }
+            while(true){
+                try{
+                    if (retrievedRun.getStatus().equals("completed")){
+                        OpenAiResponse<Message> response = service.listMessages(threadId, MessageListSearchParameters.builder()
+                                .runId(retrievedRun.getId()).build());
+                        List<Message> messages = response.getData();
+                        String assistantReply = "Something went wrong... please try again later.";
+                        for (Message message : messages) {
+                            if (message.getContent().get(0).getText().getValue() != null) {
+                                assistantReply = message.getContent().get(0).getText().getValue();
+                                break;
+                            }
+                        }
 
-            RequiredAction requiredAction = retrievedRun.getRequiredAction();
-            if (requiredAction != null) {
-                List<ToolCall> toolCalls = requiredAction.getSubmitToolOutputs().getToolCalls();
-                FunctionExecutorManager executor;
-                if (toolCalls != null && !toolCalls.isEmpty()) {
-                    List<SubmitToolOutputRequestItem> toolOutputItems = new ArrayList<>();
-                    for (ToolCall toolCall : toolCalls) {
-                        ToolCallFunction function = toolCall.getFunction();
-                        String toolCallId = toolCall.getId();
+                        return assistantReply;
+                    }else if(retrievedRun.getStatus().equals("requires_action")){
+                        RequiredAction requiredAction = retrievedRun.getRequiredAction();
+                        if (requiredAction != null) {
+                            List<ToolCall> toolCalls = requiredAction.getSubmitToolOutputs().getToolCalls();
+                            FunctionExecutorManager executor;
+                            if (toolCalls != null && !toolCalls.isEmpty()) {
+                                List<SubmitToolOutputRequestItem> toolOutputItems = new ArrayList<>();
+                                for (ToolCall toolCall : toolCalls) {
+                                    ToolCallFunction function = toolCall.getFunction();
+                                    String toolCallId = toolCall.getId();
 
-                        JsonNode jT = function.getArguments().get("title");
-                        JsonNode jsD = function.getArguments().get("startDate");
-                        JsonNode jeD = function.getArguments().get("endDate");
-                        JsonNode jsT = function.getArguments().get("startTime");
-                        JsonNode jeT = function.getArguments().get("endTime");
-                        JsonNode jD = function.getArguments().get("description");
+                                    JsonNode jT = function.getArguments().get("title");
+                                    JsonNode jsD = function.getArguments().get("startDate");
+                                    JsonNode jeD = function.getArguments().get("endDate");
+                                    JsonNode jsT = function.getArguments().get("startTime");
+                                    JsonNode jeT = function.getArguments().get("endTime");
+                                    JsonNode jD = function.getArguments().get("description");
+                                    JsonNode eId = function.getArguments().get("eventId");
 
-                        String title = jT != null? jT.asText() : "";
-                        String sD = jsD != null? jsD.asText() : "";
-                        String eD = jeD != null? jeD.asText() : "";
-                        String sT = jsT != null? jsT.asText() : "";
-                        String eT = jeT != null? jeT.asText() : "";
-                        String desc = jD != null? jD.asText() : "";
-                        Log.d("values",userId + title + "|"+sD+"|" +eD+"|" +sT+"|" +eT+"|" +desc);
-                        executor = new FunctionExecutorManager(ToolUtil(userId, title, sD, eD, sT, eT, desc));
-                        JsonNode result = executor.executeAndConvertToJson(function.getName(), function.getArguments());
-                        // Accumulate tool output items
-                        toolOutputItems.add(SubmitToolOutputRequestItem.builder()
-                                .toolCallId(toolCallId)
-                                .output(result.toPrettyString())
-                                .build());
+                                    String title = jT != null? jT.asText() : "";
+                                    String sD = jsD != null? jsD.asText() : "";
+                                    String eD = jeD != null? jeD.asText() : "";
+                                    String sT = jsT != null? jsT.asText() : "";
+                                    String eT = jeT != null? jeT.asText() : "";
+                                    String desc = jD != null? jD.asText() : "";
+                                    int eventId = eId != null? eId.asInt() : 0;
+
+                                    executor = new FunctionExecutorManager(ToolUtil(eventId, userId, title, sD, eD, sT, eT, desc));
+                                    JsonNode result = executor.executeAndConvertToJson(function.getName(), function.getArguments());
+                                    // Accumulate tool output items
+                                    toolOutputItems.add(SubmitToolOutputRequestItem.builder()
+                                            .toolCallId(toolCallId)
+                                            .output(result.toPrettyString())
+                                            .build());
+                                }
+
+                                // Submit all tool outputs at once
+                                SubmitToolOutputsRequest submitToolOutputsRequest = SubmitToolOutputsRequest.builder()
+                                        .toolOutputs(toolOutputItems)
+                                        .build();
+                                retrievedRun = service.submitToolOutputs(threadId, retrievedRun.getId(), submitToolOutputsRequest);
+                            }
+                        }
+                    }else{
+                        retrievedRun = service.retrieveRun(threadId, run.getId());
+                        java.lang.Thread.sleep(500);
                     }
-
-                    // Submit all tool outputs at once
-                    SubmitToolOutputsRequest submitToolOutputsRequest = SubmitToolOutputsRequest.builder()
-                            .toolOutputs(toolOutputItems)
-                            .build();
-                    retrievedRun = service.submitToolOutputs(threadId, retrievedRun.getId(), submitToolOutputsRequest);
+                }catch(Exception e){
+                    throw e;
                 }
             }
-
-            while (!(retrievedRun.getStatus().equals("completed"))
-                    && !(retrievedRun.getStatus().equals("failed"))
-                    && !(retrievedRun.getStatus().equals("expired"))
-                    && !(retrievedRun.getStatus().equals("incomplete"))
-                    && !(retrievedRun.getStatus().equals("requires_action"))) {
-                try {
-                    java.lang.Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                retrievedRun = service.retrieveRun(threadId, run.getId());
-            }
-
-            OpenAiResponse<Message> response = service.listMessages(threadId, MessageListSearchParameters.builder()
-                    .runId(retrievedRun.getId()).build());
-            List<Message> messages = response.getData();
-            String assistantReply = "Something went wrong... please try again later.";
-            for (Message message : messages) {
-                if (message.getContent().get(0).getText().getValue() != null) {
-                    assistantReply = message.getContent().get(0).getText().getValue();
-                    break;
-                }
-            }
-
-            return assistantReply;
         });
     }
 
@@ -149,14 +138,13 @@ public class AIHelper {
                 .observeOn(AndroidSchedulers.mainThread()); // Handle the result on the main thread
     }
 
-    private List<FunctionDefinition> ToolUtil(int userId, String title, String startDate, String endDate, String startTime, String endTime, String description){
+    private List<FunctionDefinition> ToolUtil(int eventId, int userId, String title, String startDate, String endDate, String startTime, String endTime, String description){
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy HH:mm:ss");
         String formattedNow = now.format(formatter);
-
         FunctionDefinition get_datetime_today = FunctionDefinition.builder()
                 .name("get_datetime")
-                .description("get the system time and date")
+                .description("get the day, date, and time today")
                 .executor(c -> formattedNow)
                 .build();
 
@@ -181,7 +169,7 @@ public class AIHelper {
         FunctionDefinition delete_event = FunctionDefinition.builder()
                 .name("delete_event")
                 .description("delete an event")
-                .executor(c -> c)
+                .executor(c -> db.deleteEventData(userId, eventId))
                 .build();
 
         return Arrays.asList(get_datetime_today, add_event, search_event, edit_event, delete_event);

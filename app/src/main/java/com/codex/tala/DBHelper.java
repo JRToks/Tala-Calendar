@@ -7,9 +7,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Tala.db";
@@ -220,36 +228,56 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.query(TABLE_EVENTS, projection, selection, selectionArgs, null, null, null);
     }
 
-    public Cursor searchEvent(int userId, String title, String startDate, String endDate, String startTime, String endTime) {
+    public Map<String, Object> searchEvent(int userId, String title, String startDate, String endDate, String startTime, String endTime) {
+        List<Map<String, Object>> eventList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
+
+        // Default empty string parameters to null
+        title = (title != null && !title.isEmpty()) ? title : null;
+        startDate = (startDate != null && !startDate.isEmpty()) ? startDate : null;
+        endDate = (endDate != null && !endDate.isEmpty()) ? endDate : null;
+        startTime = (startTime != null && !startTime.isEmpty()) ? startTime : null;
+        endTime = (endTime != null && !endTime.isEmpty()) ? endTime : null;
 
         String query = "SELECT * FROM " + TABLE_EVENTS + " WHERE " + COLUMN_USER_ID + " = ?";
         ArrayList<String> selectionArgsList = new ArrayList<>();
         selectionArgsList.add(String.valueOf(userId));
 
-        if (title != null && !title.isEmpty()) {
+        if (title != null) {
             query += " AND " + COLUMN_EVENT_TITLE + " LIKE ?";
             selectionArgsList.add("%" + title + "%");
         }
 
         if (startDate != null && endDate != null) {
-            query += " AND (" + COLUMN_START_DATE + " BETWEEN ? AND ? OR " + COLUMN_END_DATE + " BETWEEN ? AND ?)";
-            String startDateString = startDate.toString();
-            String endDateString = endDate.toString();
-            selectionArgsList.add(startDateString);
-            selectionArgsList.add(endDateString);
-            selectionArgsList.add(startDateString);
-            selectionArgsList.add(endDateString);
+            query += " AND ((" + COLUMN_START_DATE + " BETWEEN ? AND ?) OR (" + COLUMN_END_DATE + " BETWEEN ? AND ?))";
+            selectionArgsList.add(startDate);
+            selectionArgsList.add(endDate);
+            selectionArgsList.add(startDate);
+            selectionArgsList.add(endDate);
+        } else if (startDate != null) {
+            query += " AND (" + COLUMN_START_DATE + " = ?)";
+            selectionArgsList.add(startDate);
+            selectionArgsList.add(startDate);
+        } else if(endDate != null){
+            query += " AND (" + COLUMN_END_DATE + " = ?)";
+            selectionArgsList.add(endDate);
+            selectionArgsList.add(endDate);
         }
 
         if (startTime != null && endTime != null) {
-            query += " AND (" + COLUMN_START_TIME + " BETWEEN ? AND ? OR " + COLUMN_END_TIME + " BETWEEN ? AND ?)";
-            String startTimeString = startTime.toString();
-            String endTimeString = endTime.toString();
-            selectionArgsList.add(startTimeString);
-            selectionArgsList.add(endTimeString);
-            selectionArgsList.add(startTimeString);
-            selectionArgsList.add(endTimeString);
+            query += " AND ((" + COLUMN_START_TIME + " BETWEEN ? AND ?) OR (" + COLUMN_END_TIME + " BETWEEN ? AND ?))";
+            selectionArgsList.add(startTime);
+            selectionArgsList.add(endTime);
+            selectionArgsList.add(startTime);
+            selectionArgsList.add(endTime);
+        } else if (startTime != null) {
+            query += " AND (" + COLUMN_START_TIME + " = ?)";
+            selectionArgsList.add(startTime);
+            selectionArgsList.add(startTime);
+        }else if (endTime != null){
+            query += " AND (" + COLUMN_END_TIME + " = ?)";
+            selectionArgsList.add(endTime);
+            selectionArgsList.add(endTime);
         }
 
         // Convert selectionArgsList to an array
@@ -258,10 +286,31 @@ public class DBHelper extends SQLiteOpenHelper {
         // Execute the query
         Cursor cursor = db.rawQuery(query, selectionArgs);
 
-        // Return the cursor
-        return cursor;
-    }
+        // Iterate over the cursor to build the event list
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                do {
+                    Map<String, Object> event = new HashMap<>();
+                    event.put(COLUMN_EVENT_ID, cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_EVENT_ID)));
+                    event.put(COLUMN_EVENT_TITLE, cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_TITLE)));
+                    event.put(COLUMN_START_DATE, cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START_DATE)));
+                    event.put(COLUMN_END_DATE, cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_END_DATE)));
+                    event.put(COLUMN_START_TIME, cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START_TIME)));
+                    event.put(COLUMN_END_TIME, cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_END_TIME)));
 
+                    eventList.add(event);
+                } while (cursor.moveToNext());
+            } finally {
+                cursor.close();
+            }
+        }
+
+        // Create the final result map
+        Map<String, Object> result = new HashMap<>();
+        result.put("events", eventList);
+
+        return result;
+    }
 
     public boolean deleteEventData(int userId, int eventId) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -282,7 +331,6 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         return isDeleted;
     }
-
 
     public boolean checkCalendarEventExists(int userId, LocalDate date) {
         SQLiteDatabase db = this.getReadableDatabase();
