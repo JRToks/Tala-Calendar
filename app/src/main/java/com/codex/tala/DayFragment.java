@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DayFragment extends Fragment implements CalendarAdapter.OnItemListener{
     private TextView monthYearText;
@@ -165,6 +167,9 @@ public class DayFragment extends Fragment implements CalendarAdapter.OnItemListe
     }
 
     private void setEvent(TextView textView, Event event) {
+        if (!Objects.equals(event.getColor(), "Default Color")){
+            textView.setBackgroundColor(ContextCompat.getColor(requireContext(), getResources().getIdentifier(event.getColor(), "color", requireContext().getPackageName())));
+        }
         textView.setText(event.getName().isEmpty() ? "(No title)" : event.getName());
         textView.setVisibility(View.VISIBLE);
         textView.setOnClickListener(new View.OnClickListener() {

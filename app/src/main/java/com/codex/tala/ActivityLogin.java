@@ -16,10 +16,6 @@ import android.widget.Toast;
 
 public class ActivityLogin extends AppCompatActivity {
     private EditText mail, pass;
-    private TextView forgotPass, signUp;
-    private Switch rememberMe;
-    private Button loginBtn;
-    private ImageView googleSignInBtn;
 
     private DBHelper db;
     private Boolean rememberCond;
@@ -37,11 +33,11 @@ public class ActivityLogin extends AppCompatActivity {
 
         mail = (EditText) findViewById(R.id.email_editText);
         pass = (EditText) findViewById(R.id.password_editText);
-        forgotPass = (TextView) findViewById(R.id.forgotPasswordTextView);
-        signUp = (TextView) findViewById(R.id.signUp);
-        rememberMe = (Switch) findViewById(R.id.rememberSwitch);
-        loginBtn = (Button) findViewById(R.id.login_Btn);
-        googleSignInBtn = (ImageView) findViewById(R.id.google_Btn);
+        TextView forgotPass = (TextView) findViewById(R.id.forgotPasswordTextView);
+        TextView signUp = (TextView) findViewById(R.id.signUp);
+        Switch rememberMe = (Switch) findViewById(R.id.rememberSwitch);
+        Button loginBtn = (Button) findViewById(R.id.login_Btn);
+        ImageView googleSignInBtn = (ImageView) findViewById(R.id.google_Btn);
         db = new DBHelper(this);
 
         rememberCond = false;

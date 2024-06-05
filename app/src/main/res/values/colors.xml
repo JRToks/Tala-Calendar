@@ -12,4 +12,11 @@
     <color name="color_login_buttonpress">#007c91</color>
     <color name="color_signup_button">#F2F2F2</color>
     <color name="color_signup_buttonpress">#EBEBEB</color>
+    <color name="Flamingo">#F2583E</color>
+    <color name="Tomato">#ff6347</color>
+    <color name="Tangerine">#FFFF9800</color>
+    <color name="Banana">#FFFFEB3B</color>
+    <color name="Basil">#FF4CAF50</color>
+    <color name="Grape">#FF9C27B0</color>
+    <color name="Graphite">#FF607D8B</color>
 </resources>

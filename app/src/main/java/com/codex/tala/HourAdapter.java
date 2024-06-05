@@ -13,11 +13,15 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 public class HourAdapter extends ArrayAdapter<HourEvent> {
     public HourAdapter(@NonNull Context context, List<HourEvent> hourEvents)
@@ -78,6 +82,21 @@ public class HourAdapter extends ArrayAdapter<HourEvent> {
     }
 
     private void setEvent(TextView textView, Event event) {
+        Map<String, Integer> colorMap = new HashMap<>();
+        colorMap.put("Tomato", R.color.Tomato);
+        colorMap.put("Tangerine", R.color.Tangerine);
+        colorMap.put("Banana", R.color.Banana);
+        colorMap.put("Basil", R.color.Basil);
+        colorMap.put("Flamingo", R.color.Flamingo);
+        colorMap.put("Graphite", R.color.Graphite);
+        colorMap.put("Grape", R.color.Grape);
+
+        Integer colorResourceId = colorMap.get(event.getColor());
+        if (colorResourceId != null) {
+            textView.setBackgroundColor(ContextCompat.getColor(getContext(), colorResourceId));
+        }
+
+
         textView.setText(event.getName().isEmpty() ? "(No title)" : event.getName());
         textView.setVisibility(View.VISIBLE);
 

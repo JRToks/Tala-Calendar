@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="60dp">
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/color_event"
@@ -30,6 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/eventCellTV"
         android:layout_marginStart="20dp"
+        android:layout_marginBottom="8dp"
         android:text="10:00 AM"
         android:textColor="@color/black"
         android:textSize="15sp" />
@@ -38,7 +39,7 @@
         android:id="@+id/dash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_marginTop="25dp"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="2dp"
         android:layout_marginBottom="10dp"
@@ -54,6 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/dash"
         android:layout_below="@id/eventCellTV"
+        android:layout_marginBottom="8dp"
         android:text="12:00 PM"
         android:textColor="@color/black"
         android:textSize="15sp" />

@@ -34,6 +34,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COLUMN_END_DATE = "end_date";
     public static final String COLUMN_START_TIME = "start_time";
     public static final String COLUMN_END_TIME = "end_time";
+    public static final String COLUMN_RECURRING = "recurring";
+    public static final String COLUMN_NOTIFICATION = "notification";
+    public static final String COLUMN_COLOR = "color";
     public static final String COLUMN_DESCRIPTION = "description";
 
     public static final String CREATE_TABLE_USERS =
@@ -53,12 +56,15 @@ public class DBHelper extends SQLiteOpenHelper {
                     + COLUMN_END_DATE + " TEXT,"
                     + COLUMN_START_TIME + " TEXT,"
                     + COLUMN_END_TIME + " TEXT,"
+                    + COLUMN_RECURRING + " TEXT,"
+                    + COLUMN_NOTIFICATION + " TEXT,"
+                    + COLUMN_COLOR + " TEXT,"
                     + COLUMN_DESCRIPTION + " TEXT,"
                     + "FOREIGN KEY(" + COLUMN_USER_ID + ") REFERENCES " + TABLE_USERS + "(" + COLUMN_USER_ID + ")"
                     + ")";
 
     public DBHelper(Context context) {
-        super(context, DATABASE_NAME, null, 2);
+        super(context, DATABASE_NAME, null, 1);
     }
 
     @Override
@@ -85,7 +91,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    public boolean insertEventData(int userId, String title, String startDate, String endDate, String startTime, String endTime, String description) {
+    public boolean insertEventData(int userId, String title, String startDate, String endDate, String startTime, String endTime, String recurring, String notif, String color, String description) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_USER_ID, userId);
@@ -94,6 +100,9 @@ public class DBHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_END_DATE, endDate);
         cv.put(COLUMN_START_TIME, startTime);
         cv.put(COLUMN_END_TIME, endTime);
+        cv.put(COLUMN_RECURRING, recurring);
+        cv.put(COLUMN_NOTIFICATION, notif);
+        cv.put(COLUMN_COLOR, color);
         cv.put(COLUMN_DESCRIPTION, description);
         long result = db.insert(TABLE_EVENTS, null, cv);
         db.close();
@@ -202,7 +211,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 COLUMN_START_DATE,
                 COLUMN_END_DATE,
                 COLUMN_START_TIME,
-                COLUMN_END_TIME
+                COLUMN_END_TIME,
+                COLUMN_COLOR
         };
         String selection = COLUMN_USER_ID + " = ? AND " +
                 "? BETWEEN " + COLUMN_START_DATE + " AND " + COLUMN_END_DATE;
@@ -220,6 +230,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 COLUMN_END_DATE,
                 COLUMN_START_TIME,
                 COLUMN_END_TIME,
+                COLUMN_COLOR,
                 COLUMN_DESCRIPTION
         };
         String selection = COLUMN_USER_ID + " = ? AND " +
@@ -274,7 +285,7 @@ public class DBHelper extends SQLiteOpenHelper {
             query += " AND (" + COLUMN_START_TIME + " = ?)";
             selectionArgsList.add(startTime);
             selectionArgsList.add(startTime);
-        }else if (endTime != null){
+        } else if (endTime != null){
             query += " AND (" + COLUMN_END_TIME + " = ?)";
             selectionArgsList.add(endTime);
             selectionArgsList.add(endTime);
@@ -310,6 +321,58 @@ public class DBHelper extends SQLiteOpenHelper {
         result.put("events", eventList);
 
         return result;
+    }
+
+    public boolean editEventData(int userId, int eventId, String title, String startDate, String endDate, String startTime, String endTime, String description) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        boolean isUpdated = false;
+        if (eventId != 0){
+            title = (title != null && !title.isEmpty()) ? title : null;
+            startDate = (startDate != null && !startDate.isEmpty()) ? startDate : null;
+            endDate = (endDate != null && !endDate.isEmpty()) ? endDate : null;
+            startTime = (startTime != null && !startTime.isEmpty()) ? startTime : null;
+            endTime = (endTime != null && !endTime.isEmpty()) ? endTime : null;
+            description = (description != null && !description.isEmpty()) ? description : null;
+
+            try {
+                ContentValues newValues = new ContentValues();
+
+                if (title != null) {
+                    newValues.put(COLUMN_EVENT_TITLE, title);
+                }
+                if (startDate != null) {
+                    newValues.put(COLUMN_START_DATE, startDate);
+                }
+                if (endDate != null) {
+                    newValues.put(COLUMN_END_DATE, endDate);
+                }
+                if (startTime != null) {
+                    newValues.put(COLUMN_START_TIME, startTime);
+                }
+                if (endTime != null) {
+                    newValues.put(COLUMN_END_TIME, endTime);
+                }
+                if (description != null) {
+                    newValues.put(COLUMN_DESCRIPTION, description);
+                }
+
+                String selection = COLUMN_USER_ID + " = ? AND " + COLUMN_EVENT_ID + "= ?";
+                String[] selectionArgs = {String.valueOf(userId), String.valueOf(eventId)};
+
+                int rowsUpdated = db.update(TABLE_EVENTS, newValues, selection, selectionArgs);
+                Log.d("params", userId + " | " + eventId + " | " + title + " | " + startDate + " | " + endDate + " | " + startTime + " | " + endTime + " | " + description);
+
+                if (rowsUpdated > 0) {
+                    isUpdated = true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                db.close();
+            }
+        }
+
+        return isUpdated;
     }
 
     public boolean deleteEventData(int userId, int eventId) {

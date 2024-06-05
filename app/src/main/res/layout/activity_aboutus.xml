@@ -1,41 +1,218 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/background">
 
-    <Button
-        android:id="@+id/btn_back"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginLeft="5dp"
-        android:background="@drawable/baseline_arrow_back_ios_new_24"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="About Us"
-        android:textColor="@color/black"
-        android:textSize="20dp"
-        app:layout_constraintStart_toEndOf="@+id/btn_back"
-        app:layout_constraintTop_toTopOf="@+id/btn_back" />
+        <!-- Company Name -->
+        <TextView
+            android:id="@+id/aboutus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:fontFamily="serif-monospace"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:text="About Us"
+            android:textSize="40sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.52"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Test"
-        android:textAlignment="center"
-        android:textSize="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.473" />
+        <TextView
+            android:id="@+id/company_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="112dp"
+            android:fontFamily="serif-monospace"
+            android:padding="10dp"
+            android:text="TALA"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.141"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Mission -->
+        <TextView
+            android:id="@+id/mission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:padding="30dp"
+            android:text="Introducing TALA: A Time Management Solution for College Students and Educators. Our capstone project aims to aid college students and educators by promoting the use of online calendars for better time management. By using Tala, students can improve organization, meet deadlines, and reduce mental strain, leading to enhanced punctuality and work quality. This benefits educators by reducing the need for deadline extensions and enabling them to focus on teaching without concerns about student readiness"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/company_name" />
+
+        <!-- Contact Information Title -->
+        <TextView
+            android:id="@+id/contact_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:padding="16dp"
+            android:text="Contact Information"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mission" />
+
+        <!-- Contact Information -->
+        <TextView
+            android:id="@+id/contact_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:padding="16dp"
+            android:text="Email: feu.codex.groupemail@gmail.com\nPhone: (+63) 934-871-2230\nAddress: FEU TECH, Manila, Philippines"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/contact_title" />
+
+        <!-- Team Members Title -->
+        <TextView
+            android:id="@+id/team_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Team Members"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/contact_info"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp"
+            android:textStyle="bold"
+            android:padding="16dp"/>
+
+        <!-- Team Members -->
+
+        <ImageView
+            android:id="@+id/josh"
+            android:layout_width="150dp"
+            android:layout_height="186dp"
+            android:layout_marginTop="12dp"
+            android:padding="16dp"
+            android:src="@drawable/pineda1x1"
+            app:layout_constraintEnd_toEndOf="@+id/imageView3"
+            app:layout_constraintHorizontal_bias="0.85"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/team_title" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="150dp"
+            android:layout_height="186dp"
+            android:layout_marginTop="12dp"
+            android:padding="16dp"
+            android:src="@drawable/abiog1x1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.85"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/team_title" />
+
+        <!-- Company Values Title -->
+        <TextView
+            android:id="@+id/team_member1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="196dp"
+            android:padding="16dp"
+            android:text="Joshua Pineda - Leader        Gabriel Abiog - Member   "
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.578"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/team_title" />
+
+        <!-- Company Values -->
+
+        <!-- Company Goals Title -->
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="150dp"
+            android:layout_height="186dp"
+            android:padding="16dp"
+            android:layout_marginStart="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.073"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/team_member1"
+            app:srcCompat="@drawable/aguillion1x1" />
+
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="150dp"
+            android:layout_height="186dp"
+            android:layout_margin="10dp"
+            android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/imageView"
+            app:layout_constraintStart_toStartOf="@+id/imageView"
+            app:layout_constraintTop_toBottomOf="@+id/team_member1"
+            app:srcCompat="@drawable/reuben1x1" />
+
+        <TextView
+            android:id="@+id/team_member3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="180dp"
+            android:padding="16dp"
+            android:text="John Rey Agullion - Member     Reuben Ebina - Member"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.571"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/team_member1" />
+
+        <TextView
+            android:id="@+id/values_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Company Goals"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/team_member3" />
+
+        <!-- Company Goals -->
+
+        <TextView
+            android:id="@+id/values"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-condensed-medium"
+            android:padding="30dp"
+            android:text="1. Develop Tala, an intuitive AI-powered calendar, to tackle college students' time management challenges.\n2. Provide features for easy event organization, modification, and prioritization based on user preferences.\n3. Utilize advanced AI technologies like NLP and RL to understand user input and improve scheduling recommendations.\n4. Enhance user experience with proactive assistance, reminders, and personalized recommendations.\n5. Evaluate Tala's impact on time management and scheduling efficiency through surveys.\n6. Collaborate with stakeholders to tailor Tala to college students' needs and promote adoption.\n7. Iterate and optimize Tala based on user feedback and emerging trends.\n8. Empower students to overcome time management obstacles and enhance productivity with Tala."
+            app:layout_constraintBottom_toTopOf="@+id/btn_back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/values_title" />
+
+        <!-- Back Button -->
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

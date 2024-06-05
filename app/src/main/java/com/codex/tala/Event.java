@@ -21,7 +21,8 @@ public class Event {
                 String endDate = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_END_DATE));
                 String startTime = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_START_TIME));
                 String endTime = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_END_TIME));
-                events.add(new Event(eventID, userId, name, startDate, endDate, startTime, endTime));
+                String color = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_COLOR));
+                events.add(new Event(eventID, userId, name, startDate, endDate, startTime, endTime, color));
             } while (cursor.moveToNext());
 
             cursor.close();
@@ -50,8 +51,10 @@ public class Event {
                 String endTime = CalendarUtils.convert12to24(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_END_TIME)));
                 String[] et = endTime.split(":");
                 endTime = et[0];
+
+                String color = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_COLOR));
                 if (Integer.parseInt(startTime) == cellHour){
-                    events.add(new Event(eventID, userId, name, startDate, endDate, startTime, endTime));
+                    events.add(new Event(eventID, userId, name, startDate, endDate, startTime, endTime, color));
                 }
             } while (cursor.moveToNext());
 
@@ -61,10 +64,10 @@ public class Event {
         return events;
     }
 
-    private final String name, startDate, endDate, startTime, endTime;
+    private final String name, startDate, endDate, startTime, endTime, color;
     private final int userId, eventID;
 
-    public Event(int eventID, int userId, String name, String startDate, String endDate, String startTime, String endTime) {
+    public Event(int eventID, int userId, String name, String startDate, String endDate, String startTime, String endTime, String color) {
         this.eventID = eventID;
         this.userId = userId;
         this.name = name;
@@ -72,6 +75,7 @@ public class Event {
         this.endDate = endDate;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.color = color;
     }
 
     public int getEventID() {
@@ -100,5 +104,9 @@ public class Event {
 
     public String getEndTime() {
         return endTime;
+    }
+
+    public String getColor() {
+        return color;
     }
 }

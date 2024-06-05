@@ -97,7 +97,10 @@ public class ActivityAI extends AppCompatActivity{
         messageList.add(new Message("Typing...", Message.SENT_BY_BOT));
         Disposable disposable = aiHelper.executeSimpleChat(question, userId)
                 .subscribe(result -> addResponse(result),
-                        throwable -> Log.e("simpleChat", "Error: " + throwable.getMessage(), throwable));
+                        throwable -> {
+                            addResponse("Error occurred. Please try again later!");
+                            Log.e("ERROR", throwable.getMessage());
+                        });
         compositeDisposable.add(disposable);
     }
 

@@ -50,6 +50,10 @@
             android:windowSoftInputMode="adjustPan"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".ActivityLegalAgreements"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

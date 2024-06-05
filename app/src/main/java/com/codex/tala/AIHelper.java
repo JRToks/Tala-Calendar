@@ -142,8 +142,10 @@ public class AIHelper {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy HH:mm:ss");
         String formattedNow = now.format(formatter);
+        Log.d("params", userId + " | " + eventId + " | " + title + " | " + startDate + " | " + endDate + " | " + startTime + " | " + endTime + " | " + description);
+
         FunctionDefinition get_datetime_today = FunctionDefinition.builder()
-                .name("get_datetime")
+                .name("get_today")
                 .description("get the day, date, and time today")
                 .executor(c -> formattedNow)
                 .build();
@@ -151,7 +153,7 @@ public class AIHelper {
         FunctionDefinition add_event = FunctionDefinition.builder()
                 .name("add_event")
                 .description("Add an event")
-                .executor(c -> db.insertEventData(userId, title, startDate, endDate, startTime, endTime, description))
+                .executor(c -> db.insertEventData(userId, title, startDate, endDate, startTime, endTime,null, null, "Basil", description))
                 .build();
 
         FunctionDefinition search_event = FunctionDefinition.builder()
@@ -163,7 +165,7 @@ public class AIHelper {
         FunctionDefinition edit_event = FunctionDefinition.builder()
                 .name("edit_event")
                 .description("edit an event")
-                .executor(c -> c)
+                .executor(c -> db.editEventData(userId, eventId, title, startDate, endDate, startTime, endTime, description))
                 .build();
 
         FunctionDefinition delete_event = FunctionDefinition.builder()

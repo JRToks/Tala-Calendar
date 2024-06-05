@@ -7,13 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class EventAdapter extends ArrayAdapter<Event> {
     public EventAdapter(@NonNull Context context, List<Event> events)
@@ -30,6 +34,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
         if (convertView == null)
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.event_cell, parent, false);
 
+        ImageView color = convertView.findViewById(R.id.color_event);
         TextView eventCellTV = convertView.findViewById(R.id.eventCellTV);
         TextView startTimeCellTV = convertView.findViewById(R.id.startTimeCellTV);
         TextView endTimeCellTV = convertView.findViewById(R.id.endTimeCellTV);
@@ -64,6 +69,20 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 eventSTTitle = "Until";
                 eventETTitle = removeZeroMinutes(event.getEndTime());
             }
+        }
+
+        Map<String, Integer> colorDrawableMap = new HashMap<>();
+        colorDrawableMap.put("Tomato", R.drawable.color_circle_red);
+        colorDrawableMap.put("Tangerine", R.drawable.color_circle_orange);
+        colorDrawableMap.put("Banana", R.drawable.color_circle_yellow);
+        colorDrawableMap.put("Basil", R.drawable.color_circle_green);
+        colorDrawableMap.put("Flamingo", R.drawable.color_circle_flamingo);
+        colorDrawableMap.put("Graphite", R.drawable.color_circle_gray);
+        colorDrawableMap.put("Grape", R.drawable.color_circle_purple);
+
+        Integer drawableResourceId = colorDrawableMap.get(event.getColor());
+        if (drawableResourceId != null) {
+            color.setImageResource(drawableResourceId);
         }
 
         eventCellTV.setText(eventTitle);

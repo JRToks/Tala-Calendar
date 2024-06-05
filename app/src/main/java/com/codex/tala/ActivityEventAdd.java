@@ -1,15 +1,18 @@
 package com.codex.tala;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -25,12 +28,15 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class ActivityEventAdd extends AppCompatActivity {
+    private LinearLayout changeColor;
+    private ImageView circleColor;
     private EditText eventNameET, descriptionET;
-    private TextView dateStartTv, dateEndTv, timeStartTv, timeEndTv;
+    private TextView dateStartTv, dateEndTv, timeStartTv, timeEndTv, colorNameTv;
     private DatePickerDialog.OnDateSetListener mStartDateSetListener, mEndDateSetListener;
     private DBHelper db;
-    private int year, month, day, userId;
     private LocalDate startDateVal, endDateVal;
+    private int year, month, day, userId;
+
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
@@ -51,6 +57,9 @@ public class ActivityEventAdd extends AppCompatActivity {
         month = startDateVal.getMonthValue()-1;
         day = startDateVal.getDayOfMonth();
 
+        changeColor = findViewById(R.id.lin_changeColor);
+        circleColor = findViewById(R.id.circleColor);
+        colorNameTv = findViewById(R.id.colorNameTV);
         eventNameET = findViewById(R.id.eventNameET);
         dateStartTv = (TextView) findViewById(R.id.dateStartTv);
         dateEndTv = (TextView) findViewById(R.id.dateEndTv);
@@ -68,6 +77,7 @@ public class ActivityEventAdd extends AppCompatActivity {
         endDate();
         startTime();
         endTime();
+        setColor();
 
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +85,7 @@ public class ActivityEventAdd extends AppCompatActivity {
                 String eventName = eventNameET.getText().toString();
                 String startTime = timeStartTv.getText().toString();
                 String endTime = timeEndTv.getText().toString();
+                String color = colorNameTv.getText().toString();
                 String description = descriptionET.getText().toString();
 
                 LocalTime sT = LocalTime.parse(CalendarUtils.convert12to24(startTime));
@@ -84,7 +95,7 @@ public class ActivityEventAdd extends AppCompatActivity {
                     dateEndTv.setTextColor(Color.RED);
                     timeEndTv.setTextColor(Color.RED);
                 }else{
-                    boolean insert = db.insertEventData(userId, eventName, startDateVal.toString(), endDateVal.toString(), startTime, endTime, description); //runs the inserteventdata function in the dbhelper class
+                    boolean insert = db.insertEventData(userId, eventName, startDateVal.toString(), endDateVal.toString(), startTime, endTime, null, null, color, description); //runs the inserteventdata function in the dbhelper class
                     if (insert) {
                         db.close();
                         finish();
@@ -102,6 +113,94 @@ public class ActivityEventAdd extends AppCompatActivity {
                 db.close();
                 finish();
                 overridePendingTransition(0,R.anim.slide_down_anim);
+            }
+        });
+    }
+
+    private void setColor() {
+        changeColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEventAdd.this);
+                LayoutInflater inflater = getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.color_picker_dialog, null);
+                builder.setView(dialogView);
+
+                final AlertDialog dialog = builder.create();
+
+                dialogView.findViewById(R.id.color1).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.color_circle_red);
+                        colorNameTv.setText("Tomato");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogView.findViewById(R.id.color2).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.color_circle_orange);
+                        colorNameTv.setText("Tangerine");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogView.findViewById(R.id.color3).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.color_circle_yellow);
+                        colorNameTv.setText("Banana");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogView.findViewById(R.id.color4).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.color_circle_green);
+                        colorNameTv.setText("Basil");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogView.findViewById(R.id.color5).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.color_circle_purple);
+                        colorNameTv.setText("Grape");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogView.findViewById(R.id.color6).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.color_circle_flamingo);
+                        colorNameTv.setText("Flamingo");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogView.findViewById(R.id.color7).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.color_circle_gray);
+                        colorNameTv.setText("Graphite");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialogView.findViewById(R.id.color8).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        circleColor.setImageResource(R.drawable.baseline_darkcyan_circle_24);
+                        colorNameTv.setText("Default Color");
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.show();
             }
         });
     }

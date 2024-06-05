@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/background"
+    tools:context=".ActivityLegalAgreements">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/title1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Tala Application\n\nTerms of Service (TOS)"
+            android:textSize="24sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/introduction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:text="Welcome to Tala! These Terms of Service (TOS) govern your access to and use of the Tala application and its related services. By accessing or using Tala, you agree to be bound by these Terms and Conditions. If you do not agree to these Terms and Conditions, please do not use Tala."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/acceptance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Acceptance of Terms"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/description_acceptance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="By accessing or using Tala, you agree to these Terms and Conditions and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing Tala."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/description_service"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2. Description of Service"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/description_service_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tala is an AI-powered calendar application designed to assist college students in managing their schedules, tasks, and events. The application utilizes artificial intelligence technologies such as Natural Language Processing (NLP) and Reinforcement Learning (RL) to provide personalized scheduling recommendations and assistance."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/user_accounts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3. User Accounts"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/user_accounts_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="To access certain features of Tala, you may be required to create a user account. You agree to provide accurate, current, and complete information during the registration process and to update such information to keep it accurate, current, and complete."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/privacy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="4. Privacy"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/privacy_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and disclose information about you when you use Tala. By using Tala, you consent to the collection, use, and disclosure of your information as described in the Privacy Policy."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/intellectual_property"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="5. Intellectual Property"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/intellectual_property_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="All content, features, and functionality provided by Tala, including but not limited to text, graphics, logos, icons, and images, are the intellectual property of Tala or its licensors and are protected by copyright, trademark, and other intellectual property laws."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/prohibited_conduct"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="6. Prohibited Conduct"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/prohibited_conduct_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="You agree not to:\n- Use Tala in any unlawful manner or for any unlawful purpose.\n- Upload, post, or transmit any content that is harmful, offensive, or violates the rights of others.\n- Attempt to gain unauthorized access to any part of Tala or its related systems or networks.\n- Modify, adapt, or reverse engineer any part of Tala.\n- Use any automated means to access or interact with Tala without our express written permission."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/limitation_of_liability"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="7. Limitation of Liability"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/limitation_of_liability_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="In no event shall Tala or its affiliates be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in any way connected with your use of Tala or these Terms and Conditions."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/modifications_to_terms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="8. Modifications to Terms"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/modifications_to_terms_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="We reserve the right to modify these Terms and Conditions at any time. Any changes will be effective immediately upon posting the revised Terms on Tala. Your continued use of Tala after the posting of the revised Terms constitutes your acceptance of the changes."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/governing_law"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="9. Governing Law"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/governing_law_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="These Terms and Conditions shall be governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="\nPrivacy Policy"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This Privacy Policy describes how Tala collects, uses, and discloses information about you when you use the Tala application and its related services. By using Tala, you consent to the collection, use, and disclosure of your information as described in this Privacy Policy."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/information_collect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Information We Collect"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/personal_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Personal Information:"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/personal_info_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="When you create a user account on Tala, we may collect personal information such as your name and email address."
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/usage_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Usage Information:"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/usage_info_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="We may collect information about how you use Tala, including your interactions with the application, preferences, and settings."
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/device_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Device Information:"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/device_info_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="We may collect information about the device you use to access Tala, including device type, operating system, and unique device identifiers."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/how_we_use"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2. How We Use Your Information"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/how_we_use_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="We may use the information we collect to provide, maintain, and improve Tala's features and functionalities. We may use your email address to send you notifications, updates, and promotional materials about Tala. We may use aggregated and anonymized data for analytical purposes to understand usage trends and improve user experience." />
+
+        <TextView
+            android:id="@+id/information_sharing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3. Information Sharing and Disclosure"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/information_sharing_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="We may share your personal information with third-party service providers who assist us in providing, maintaining, and improving Tala. We may disclose your information if required by law or legal process, or to protect the rights, property, or safety of Tala, its users, or others."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/data_security"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="4. Data Security"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/data_security_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="We take reasonable measures to protect the security of your information and prevent unauthorized access, disclosure, alteration, or destruction. However, no method of transmission over the internet or electronic storage is 100% secure, and we cannot guarantee absolute security."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/children_privacy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="5. Children's Privacy"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/children_privacy_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tala is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe that your child has provided us with personal information, please contact us to request deletion of the information."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/changes_policy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="6. Changes to this Privacy Policy"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/changes_policy_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="We reserve the right to modify this Privacy Policy at any time. If we make material changes to this Privacy Policy, we will notify you by email or by posting a notice on Tala prior to the change becoming effective."
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/contact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="7. Contact Us"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/contact_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="If you have any questions about this Privacy Policy, please contact us at feu.codex.groupemail@gmail.com."
+            android:layout_marginBottom="16dp"/>
+
+        <CheckBox
+            android:id="@+id/checkbox_accept_policy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I agree to the Privacy Policy"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center" />
+
+        <CheckBox
+            android:id="@+id/checkbox_accept_terms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I agree to the Terms and Conditions"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"
+            android:layout_gravity="center_horizontal"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/sign_up_accept"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
+                android:background="@drawable/selector_login_button"
+                android:fontFamily="sans-serif"
+                android:padding="5dp"
+                android:text="ACCEPT"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:typeface="normal"/>
+
+            <Button
+                android:id="@+id/sign_up_cancel"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/selector_login_button"
+                android:fontFamily="sans-serif"
+                android:padding="5dp"
+                android:text="CANCEL"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:typeface="normal"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,12 +1,14 @@
 package com.codex.tala;
 
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,8 +16,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 public class ActivityEventDetails extends AppCompatActivity {
-    private TextView title, description, startDate, endDate, startTime, endTime, monthTv;
+    private TextView title, description, startDate, endDate, startTime, endTime, monthTv, colorTv;
+    private ImageView editColor;
     private DBHelper db;
     private LinearLayout linearLayout;
     private Button edit_event_btn, delete_event_btn;
@@ -47,13 +54,14 @@ public class ActivityEventDetails extends AppCompatActivity {
         endDate = (TextView) findViewById(R.id.ED_dateEndTv);
         startTime = (TextView) findViewById(R.id.ED_timeStartTv);
         endTime = (TextView) findViewById(R.id.ED_timeEndTv);
+        colorTv = (TextView) findViewById(R.id.editColorTv);
+        editColor = (ImageView) findViewById(R.id.editColor);
 
         db = new DBHelper(this);
         setEventDetails();
         setupBtnClickListeners();
         db.close();
     }
-
     private void setupBtnClickListeners() {
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,6 +122,22 @@ public class ActivityEventDetails extends AppCompatActivity {
             if (descCheck.isEmpty())
                 descCheck = "Add description";
             description.setText(descCheck);
+
+            String color = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_COLOR));
+            Map<String, Integer> colorMap = new HashMap<>();
+            colorMap.put("Tomato", R.drawable.color_circle_red);
+            colorMap.put("Tangerine", R.drawable.color_circle_orange);
+            colorMap.put("Banana", R.drawable.color_circle_yellow);
+            colorMap.put("Basil", R.drawable.color_circle_green);
+            colorMap.put("Flamingo", R.drawable.color_circle_flamingo);
+            colorMap.put("Graphite", R.drawable.color_circle_gray);
+            colorMap.put("Grape", R.drawable.color_circle_purple);
+
+            Integer colorResourceId = colorMap.get(color);
+            if (colorResourceId != null) {
+                editColor.setImageResource(colorResourceId);
+                colorTv.setText(color);
+            }
 
             String startDateStr = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_START_DATE));
             String formattedStartDate = CalendarUtils.convertDateFormat(startDateStr);

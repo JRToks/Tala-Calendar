@@ -1,11 +1,14 @@
 package com.codex.tala;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,8 +17,9 @@ import com.google.android.material.textfield.TextInputEditText;
 public class ActivitySignUp extends AppCompatActivity {
 
     private TextInputEditText usernameInput, emailInput, pwdInput, retypepwdInput;
-    private TextView signin_btn;
     private Button createAccountButton;
+    private CheckBox acceptTerms;
+    private ActivityResultLauncher<Intent> launcher;
     private DBHelper db;
 
     @Override
@@ -33,10 +37,12 @@ public class ActivitySignUp extends AppCompatActivity {
         emailInput = (TextInputEditText) findViewById(R.id.email_editText);
         pwdInput = (TextInputEditText) findViewById(R.id.password_editText);
         retypepwdInput = (TextInputEditText) findViewById(R.id.retypepass_editText);
-        signin_btn = (TextView) findViewById(R.id.signin_btn);
+        acceptTerms = (CheckBox) findViewById(R.id.terms_and_privacy_textview);
+        TextView signin_btn = (TextView) findViewById(R.id.signin_btn);
         createAccountButton = (Button) findViewById(R.id.create_account);
         db = new DBHelper(this);
 
+        createAccountButton.setEnabled(false);
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,9 +52,9 @@ public class ActivitySignUp extends AppCompatActivity {
                     String password = pwdInput.getText().toString();
 
                     Boolean checkemail = db.checkemail(email); //runs the checkemail function in the dbhelper class
-                    if (checkemail == false) {
+                    if (!checkemail) {
                         Boolean insert = db.insertUsersData(email, username, password); //runs the insertdata function in the dbhelper class
-                        if (insert == true) {
+                        if (insert) {
                             finish();
                         } else {
                             Toast.makeText(ActivitySignUp.this, "Something went wrong. Please try again later", Toast.LENGTH_SHORT).show();
@@ -66,6 +72,28 @@ public class ActivitySignUp extends AppCompatActivity {
                 Intent intent = new Intent(ActivitySignUp.this, ActivityLogin.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+            }
+        });
+
+        launcher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        acceptTerms.setChecked(true);
+                        createAccountButton.setEnabled(true);
+                    }else{
+                        acceptTerms.setChecked(false);
+                        createAccountButton.setEnabled(false);
+                    }
+                }
+        );
+
+        acceptTerms.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                Intent intent = new Intent(ActivitySignUp.this, ActivityLegalAgreements.class);
+                launcher.launch(intent);
+            }else{
+                createAccountButton.setEnabled(false);
             }
         });
     }
