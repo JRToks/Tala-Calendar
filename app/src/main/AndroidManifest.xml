@@ -4,6 +4,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:name=".PersistenceEnabler"
@@ -16,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
+        <receiver android:name=".NotificationReceiver"/>
         <activity
             android:name=".ActivityMain"
             android:exported="true">
@@ -43,11 +47,11 @@
             android:exported="true">
         </activity>
         <activity
-            android:name=".ActivityEventDetails"
+            android:name=".ActivityEventEdit"
             android:exported="true">
         </activity>
         <activity
-            android:name=".ActivityEventEdit"
+            android:name=".ActivityEventDetails"
             android:exported="true">
         </activity>
         <activity

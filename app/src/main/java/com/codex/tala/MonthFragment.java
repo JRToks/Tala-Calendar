@@ -3,35 +3,40 @@ package com.codex.tala;
 import static com.codex.tala.CalendarUtils.daysInMonthArray;
 import static com.codex.tala.CalendarUtils.monthYearFromDate;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class MonthFragment extends Fragment implements CalendarAdapter.OnItemListener{
 
     private TextView monthYearText;
     private RecyclerView calendarRecyclerView;
     private ListView eventListView;
-    private String userId;
-
-    public MonthFragment(String userId) {
-        this.userId = userId;
-    }
+    private DBHelper db;
+    private final String userId;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_month, container, false);
         initWidgets(view);
         setBtn(view);
@@ -40,10 +45,15 @@ public class MonthFragment extends Fragment implements CalendarAdapter.OnItemLis
         return view;
     }
 
-    private void initWidgets(View view) {
-        calendarRecyclerView = view.findViewById(R.id.calendarRecyclerView);
-        monthYearText = view.findViewById(R.id.tv_monthYear);
-        eventListView = view.findViewById(R.id.eventListView);
+    public MonthFragment(String userId){
+        this.userId = userId;
+    }
+
+    private void initWidgets(View view)
+    {
+        calendarRecyclerView = (RecyclerView) view.findViewById(R.id.calendarRecyclerView);
+        monthYearText = (TextView) view.findViewById(R.id.tv_monthYear);
+        eventListView = (ListView) view.findViewById(R.id.eventListView);
     }
 
     private void setMonthView() {
@@ -73,6 +83,7 @@ public class MonthFragment extends Fragment implements CalendarAdapter.OnItemLis
                 nextMonthAction();
             }
         });
+
     }
 
     public void previousMonthAction() {
@@ -86,8 +97,8 @@ public class MonthFragment extends Fragment implements CalendarAdapter.OnItemLis
     }
 
     @Override
-    public void onItemClick(int position, LocalDate date) {
-        if (date != null) {
+    public void onItemclick(int position, LocalDate date) {
+        if (date != null){
             CalendarUtils.selectedDate = date;
             setMonthView();
         }
@@ -100,18 +111,10 @@ public class MonthFragment extends Fragment implements CalendarAdapter.OnItemLis
     }
 
     private void setEventAdapter() {
-        Event.eventsForDate(userId, CalendarUtils.selectedDate, new Event.OnEventsFetchedListener() {
-            @Override
-            public void onEventsFetched(ArrayList<Event> events) {
-                EventAdapter eventAdapter = new EventAdapter(requireContext().getApplicationContext(), events);
-                eventListView.setAdapter(eventAdapter);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                e.printStackTrace();
-                // Handle the error, maybe show a message to the user
-            }
-        });
+        db = new DBHelper(getContext());
+        ArrayList<Event> dailyEvents = Event.eventsForDate(db,userId,CalendarUtils.selectedDate); //all events that occured on the selectedDate
+        EventAdapter eventAdapter = new EventAdapter(requireContext().getApplicationContext(), dailyEvents); //function to populate the listview with the events
+        db.close();
+        eventListView.setAdapter(eventAdapter);
     }
 }

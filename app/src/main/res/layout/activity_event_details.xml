@@ -118,30 +118,22 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/ED_dateStartTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Starts"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:layout_marginStart="60dp"
-                android:layout_marginEnd="20sp"/>
-
-            <TextView
-                android:id="@+id/ED_dateStartTv"
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
+                android:layout_marginEnd="85dp"
                 android:text="Monday, Mar 4"
-                android:textAlignment="textEnd"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:layout_marginStart="17dp"/>
+                android:layout_marginStart="60dp"/>
 
             <TextView
                 android:id="@+id/ED_timeStartTv"
-                android:layout_width="90dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
+                android:layout_weight="1"
                 android:textAlignment="textEnd"
                 android:layout_marginEnd="15sp"
                 android:text="3:00 AM"
@@ -156,33 +148,25 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/ED_dateEndTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ends"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:layout_marginStart="60dp"
-                android:layout_marginEnd="28sp"/>
-
-            <TextView
-                android:id="@+id/ED_dateEndTv"
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
+                android:layout_marginEnd="85dp"
                 android:text="Monday, Mar 4"
-                android:textAlignment="textEnd"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:layout_marginStart="18dp"/>
+                android:layout_marginStart="60dp" />
 
             <TextView
                 android:id="@+id/ED_timeEndTv"
-                android:layout_width="90dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
+                android:layout_weight="1"
                 android:textAlignment="textEnd"
                 android:layout_marginEnd="15sp"
-                android:text="3:00 AM"
+                android:text="3:45 AM"
                 android:textColor="@color/black"
                 android:textSize="18sp"/>
         </LinearLayout>

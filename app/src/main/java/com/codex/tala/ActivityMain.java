@@ -21,13 +21,17 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class ActivityMain extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private FirebaseAuth mAuth;
+    private FirebaseDatabase database;
     private FirebaseUser currentUser;
+    private DatabaseReference userRef, eventRef;
     private SessionManager sessionManager;
     private FragmentManager fragmentManager;
     private DrawerLayout drawerLayout;
@@ -44,7 +48,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
         mAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
         currentUser = mAuth.getCurrentUser();
+        userRef = database.getReference("users");
+        eventRef = database.getReference("events");
         rememberMe = getIntent().getStringExtra("rememberMe");
 
         Toolbar toolbar = findViewById(R.id.toolbar);

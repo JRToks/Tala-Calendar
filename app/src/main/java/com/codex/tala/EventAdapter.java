@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +17,7 @@ import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class EventAdapter extends ArrayAdapter<Event> {
     public EventAdapter(@NonNull Context context, List<Event> events)
@@ -47,8 +49,8 @@ public class EventAdapter extends ArrayAdapter<Event> {
             String endDate = event.getEndDate();
             String startDate = event.getStartDate();
 
-            if (!event.getTitle().isEmpty()){
-                eventTitle = event.getTitle();
+            if (!event.getName().isEmpty()){
+                eventTitle = event.getName();
             }
 
             if (selectedDate.equals(startDate) && selectedDate.equals(endDate)) { // One-day event
@@ -93,6 +95,7 @@ public class EventAdapter extends ArrayAdapter<Event> {
                 Intent intent = new Intent(getContext(), ActivityEventDetails.class);
                 assert event != null;
                 intent.putExtra("eventId", event.getEventID());
+                intent.putExtra("userId", event.getUserId());
                 if (getContext() instanceof Activity) {
                     Activity activity = (Activity) getContext();
                     activity.startActivity(intent);

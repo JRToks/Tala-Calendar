@@ -1,14 +1,7 @@
 package com.codex.tala;
 
 import android.database.Cursor;
-
-import androidx.annotation.NonNull;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import android.util.Log;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,97 +9,69 @@ import java.util.ArrayList;
 
 public class Event {
     public static ArrayList<Event> eventsList = new ArrayList<>();
+    public static ArrayList<Event> eventsForDate(DBHelper db, String userId, LocalDate date) {
+        ArrayList<Event> events = new ArrayList<>();
+        Cursor cursor = db.getEventDataForDate(userId, date);
+        if (cursor != null && cursor.moveToFirst()) {
+            // TODO: add the other event details in here
+            do {
+                int eventID = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_EVENT_ID));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_EVENT_TITLE));
+                String startDate = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_START_DATE));
+                String endDate = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_END_DATE));
+                String startTime = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_START_TIME));
+                String endTime = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_END_TIME));
+                String color = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_COLOR));
+                events.add(new Event(eventID, userId, name, startDate, endDate, startTime, endTime, color));
+            } while (cursor.moveToNext());
 
-    public static void eventsForDate(String userId, LocalDate date, final OnEventsFetchedListener listener) {
-        DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-        String dateString = date.toString();
+            cursor.close();
+        }
 
-        eventsRef.orderByChild("uid").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<Event> events = new ArrayList<>();
-                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
-                    String startDate = eventSnapshot.child("startDate").getValue(String.class);
-                    String endDate = eventSnapshot.child("endDate").getValue(String.class);
-
-                    if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
-                        LocalDate eventStartDate = LocalDate.parse(startDate);
-                        LocalDate eventEndDate = LocalDate.parse(endDate);
-
-                        if (!date.isBefore(eventStartDate) && !date.isAfter(eventEndDate)) {
-                            String eventID = eventSnapshot.getKey();
-                            String title = eventSnapshot.child("title").getValue(String.class);
-                            String startTime = eventSnapshot.child("startTime").getValue(String.class);
-                            String endTime = eventSnapshot.child("endTime").getValue(String.class);
-                            String color = eventSnapshot.child("color").getValue(String.class);
-
-                            Event event = new Event(eventID, userId, title, startDate, endDate, startTime, endTime, color);
-                            events.add(event);
-                        }
-                    }
-                }
-                listener.onEventsFetched(events);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                listener.onError(databaseError.toException());
-            }
-        });
+        return events;
     }
 
-    public static void eventsForDateAndTime(String userId, LocalDate date, LocalTime time, final OnEventsFetchedListener listener) {
-        DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-        String dateString = date.toString();
+    public static ArrayList<Event> eventsForDateAndTime(DBHelper db, String userId, LocalDate date, LocalTime time) {
+        ArrayList<Event> events = new ArrayList<>();
+
+        Cursor cursor = db.getEventDataForDate(userId, date);
         int cellHour = time.getHour();
+        if (cursor != null && cursor.moveToFirst()) {
+            // TODO: add the other event details in here
+            do {
+                int eventID = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_EVENT_ID));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_EVENT_TITLE));
+                String startDate = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_START_DATE));
+                String endDate = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_END_DATE));
 
-        eventsRef.orderByChild("uid").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<Event> events = new ArrayList<>();
-                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
-                    String startDate = eventSnapshot.child("startDate").getValue(String.class);
-                    String startTime = eventSnapshot.child("startTime").getValue(String.class);
+                String startTime = CalendarUtils.convert12to24(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_START_TIME)));
+                String[] st = startTime.split(":");
+                startTime = st[0];
 
-                    if (startDate != null && startTime != null && !startDate.isEmpty() && !startTime.isEmpty()) {
-                        LocalDate eventStartDate = LocalDate.parse(startDate);
-                        String[] st = startTime.split(":");
-                        int startHour = Integer.parseInt(st[0]);
+                String endTime = CalendarUtils.convert12to24(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_END_TIME)));
+                String[] et = endTime.split(":");
+                endTime = et[0];
 
-                        if (date.equals(eventStartDate) && startHour == cellHour) {
-                            String eventID = eventSnapshot.getKey();
-                            String title = eventSnapshot.child("title").getValue(String.class);
-                            String endDate = eventSnapshot.child("endDate").getValue(String.class);
-                            String endTime = eventSnapshot.child("endTime").getValue(String.class);
-                            String color = eventSnapshot.child("color").getValue(String.class);
-
-                            Event event = new Event(eventID, userId, title, startDate, endDate, startTime, endTime, color);
-                            events.add(event);
-                        }
-                    }
+                String color = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_COLOR));
+                if (Integer.parseInt(startTime) == cellHour){
+                    events.add(new Event(eventID, userId, name, startDate, endDate, startTime, endTime, color));
                 }
-                listener.onEventsFetched(events);
-            }
+            } while (cursor.moveToNext());
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                listener.onError(databaseError.toException());
-            }
-        });
+            cursor.close();
+        }
+
+        return events;
     }
 
-    public interface OnEventsFetchedListener {
-        void onEventsFetched(ArrayList<Event> events);
-        void onError(Exception e);
-    }
+    private final String name, startDate, endDate, startTime, endTime, color;
+    private final int eventID;
+    private final String userId;
 
-    private final String title, startDate, endDate, startTime, endTime, color;
-    private final String userId, eventID;
-
-    public Event(String eventID, String userId, String title, String startDate, String endDate, String startTime, String endTime, String color) {
+    public Event(int eventID, String userId, String name, String startDate, String endDate, String startTime, String endTime, String color) {
         this.eventID = eventID;
         this.userId = userId;
-        this.title = title;
+        this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
         this.startTime = startTime;
@@ -114,7 +79,7 @@ public class Event {
         this.color = color;
     }
 
-    public String getEventID() {
+    public int getEventID() {
         return eventID;
     }
 
@@ -122,8 +87,8 @@ public class Event {
         return userId;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
     public String getStartDate() {

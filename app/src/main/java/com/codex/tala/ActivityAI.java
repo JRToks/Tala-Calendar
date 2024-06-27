@@ -17,8 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,11 +35,10 @@ public class ActivityAI extends AppCompatActivity{
     private MessageAdapter messageAdapter;
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private final AIHelper aiHelper = new AIHelper(this);
+
+    private String userId;
     private FirebaseAuth mAuth;
     private FirebaseUser currentuser;
-    private FirebaseDatabase database;
-    private DatabaseReference eventsRef;
-    private String userId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,9 +51,6 @@ public class ActivityAI extends AppCompatActivity{
 
         mAuth = FirebaseAuth.getInstance();
         currentuser = mAuth.getCurrentUser();
-        database = FirebaseDatabase.getInstance();
-        eventsRef = database.getReference("events");
-
         userId = currentuser.getUid();
 
         gestureDetector = new GestureDetector(this, new SwipeGestureListener());
@@ -67,6 +61,7 @@ public class ActivityAI extends AppCompatActivity{
         btnSend = findViewById(R.id.send_btn);
 
         messageList = new ArrayList<>();
+        //Recycler View
         messageAdapter = new MessageAdapter(messageList);
         recyclerView.setAdapter(messageAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -97,6 +92,7 @@ public class ActivityAI extends AppCompatActivity{
         });
     }
 
+    //add response function sent by bot
     private void addResponse(String response){
         messageList.remove(messageList.size()-1);
         addToChat(response, Message.SENT_BY_BOT);

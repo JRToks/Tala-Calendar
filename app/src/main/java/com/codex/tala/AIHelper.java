@@ -27,9 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
@@ -39,9 +36,11 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class AIHelper {
     private final OpenAiService service = new OpenAiService(BuildConfig.OPENAI_API_KEY);
     private final String assistantId = "asst_2ahlqVcUrk7KK6G8PlT3vWOi";
+    private final DBHelper db;
     public static Thread thread;
 
     public AIHelper(Context context){
+        this.db = new DBHelper(context);
     }
     private Single<String> simpleChat(String prompt, String userId) {
         return Single.fromCallable(() -> {
@@ -153,52 +152,28 @@ public class AIHelper {
         FunctionDefinition add_event = FunctionDefinition.builder()
                 .name("add_event")
                 .description("Add an event")
-                .executor(c -> {
-                    CompletableFuture<Boolean> result = FireBaseHelper.insertEventData(userId, title, startDate, endDate, startTime, endTime, null, "30 minutes before", "Basil", description);
-                    try {
-                        return (boolean) result.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        return false;
-                    }
-                })
+                .executor(c -> db.insertEventData(userId, title, startDate, endDate, startTime, endTime,null, null, "Basil", description))
                 .build();
 
         FunctionDefinition search_event = FunctionDefinition.builder()
                 .name("search_event")
-                .description("Search an event")
-                .executor(c -> {
-                    CompletableFuture<Map<String, Object>> resultFuture = FireBaseHelper.searchEvent(userId, title, startDate, endDate, startTime, endTime);
-
-                    resultFuture.thenAccept(result -> {
-                        List<Map<String, Object>> events = (List<Map<String, Object>>) result.get("events");
-                        events.forEach(event -> {
-                            Log.d("EventSearch", "Event ID: " + event.get("eventId"));
-                            Log.d("EventSearch", "Event Title: " + event.get("title"));
-                        });
-                    }).exceptionally(e -> {
-                        // Handle exceptions
-                        System.err.println("Error searching event: " + e.getMessage());
-                        return null;
-                    });
-
-                    return resultFuture;
-                })
+                .description("search an event")
+                .executor(c -> db.searchEvent(userId, title, startDate, endDate, startTime, endTime))
                 .build();
 
+        FunctionDefinition edit_event = FunctionDefinition.builder()
+                .name("edit_event")
+                .description("edit an event")
+                .executor(c -> db.editEventData(userId, eventId, title, startDate, endDate, startTime, endTime, description))
+                .build();
 
-//        FunctionDefinition edit_event = FunctionDefinition.builder()
-//                .name("edit_event")
-//                .description("edit an event")
-//                .executor(c -> db.editEventData(userId, eventId, title, startDate, endDate, startTime, endTime, description))
-//                .build();
-//
-//        FunctionDefinition delete_event = FunctionDefinition.builder()
-//                .name("delete_event")
-//                .description("delete an event")
-//                .executor(c -> db.deleteEventData(userId, eventId))
-//                .build();
+        FunctionDefinition delete_event = FunctionDefinition.builder()
+                .name("delete_event")
+                .description("delete an event")
+                .executor(c -> db.deleteEventData(userId, eventId))
+                .build();
 
-        return Arrays.asList(get_datetime_today, add_event, search_event);
+        return Arrays.asList(get_datetime_today, add_event, search_event, edit_event, delete_event);
     }
 
     public Completable deleteThread() {

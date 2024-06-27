@@ -1,8 +1,11 @@
 package com.codex.tala;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -22,18 +25,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -43,29 +44,28 @@ public class ActivityEventAdd extends AppCompatActivity {
     private EditText eventNameET, descriptionET;
     private TextView dateStartTv, dateEndTv, timeStartTv, timeEndTv, colorNameTv, repeatTv, notificationTv;
     private DatePickerDialog.OnDateSetListener mStartDateSetListener, mEndDateSetListener;
+    private DBHelper db;
     private LocalDate startDateVal, endDateVal;
     private int year, month, day;
     private String userId;
     private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-    private FirebaseDatabase database;
-    private DatabaseReference  eventRef;
+    private FirebaseUser currentuser;
 
     @Override
     public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event);
 
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(uiOptions);
 
+        db = new DBHelper(this);
         mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        database = FirebaseDatabase.getInstance();
-        eventRef = database.getReference("events");
-
-        userId = currentUser.getUid();
+        currentuser = mAuth.getCurrentUser();
+        userId = currentuser.getUid();
 
         startDateVal = endDateVal = CalendarUtils.selectedDate;
         year = startDateVal.getYear();
@@ -113,26 +113,27 @@ public class ActivityEventAdd extends AppCompatActivity {
 
                 LocalTime sT = LocalTime.parse(CalendarUtils.convert12to24(startTime));
                 LocalTime eT = LocalTime.parse(CalendarUtils.convert12to24(endTime));
+
+                LocalTime notificationTime = calculateNotificationTime(sT, notif);
+
                 if (startDateVal.isAfter(endDateVal) || (sT.isAfter(eT) && startDateVal.isEqual(endDateVal))){
                     Toast.makeText(ActivityEventAdd.this, "The event end time cannot be set before the start time.", Toast.LENGTH_SHORT).show();
                     dateEndTv.setTextColor(Color.RED);
                     timeEndTv.setTextColor(Color.RED);
                 }else{
-                    HashMap<String, Object> eventData = new HashMap<>();
-                    eventData.put("uid", userId);
-                    eventData.put("title", eventName);
-                    eventData.put("startDate", startDateVal.toString());
-                    eventData.put("endDate", endDateVal.toString());
-                    eventData.put("startTime", startTime);
-                    eventData.put("endTime", endTime);
-                    eventData.put("recurring", recurr);
-                    eventData.put("notification", notif);
-                    eventData.put("color", color);
-                    eventData.put("description", description);
+                    boolean insert = db.insertEventData(userId, eventName, startDateVal.toString(), endDateVal.toString(), startTime, endTime, recurr, notif, color, description); //runs the inserteventdata function in the dbhelper class
+                    if (insert) {
+                        db.close();
+                        finish();
+                        overridePendingTransition(0,R.anim.slide_down_anim);
 
-                    eventRef.push().setValue(eventData);
-                    finish();
-                    overridePendingTransition(0, R.anim.slide_down_anim);
+                        // Schedule notification
+                        if (!notif.equals("None")) {
+                            scheduleNotification(notificationTime, eventName);
+                        }
+                    } else {
+                        Toast.makeText(ActivityEventAdd.this, "Something went wrong. Please try again later", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -140,11 +141,78 @@ public class ActivityEventAdd extends AppCompatActivity {
         cancelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                db.close();
                 finish();
                 overridePendingTransition(0,R.anim.slide_down_anim);
             }
         });
     }
+
+    private void scheduleNotification(LocalTime notificationTime, String eventName) {
+        // Convert LocalTime to milliseconds since epoch
+        long notificationMillis = getNotificationMillis(notificationTime);
+
+        // Create an intent that will be fired when the notification is triggered
+        Intent notificationIntent = new Intent(getApplicationContext(), NotificationReceiver.class);
+        notificationIntent.putExtra("eventName", eventName);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                getApplicationContext(),
+                0,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE // Add FLAG_IMMUTABLE
+        );
+
+        // Get the AlarmManager service
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        if (alarmManager != null) {
+            // Set the alarm
+            alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    notificationMillis,
+                    pendingIntent
+            );
+        }
+    }
+
+    private long getNotificationMillis(LocalTime notificationTime) {
+        LocalDate eventDate = LocalDate.now(); // Use today's date or event date
+        LocalDateTime eventDateTime = LocalDateTime.of(eventDate, notificationTime);
+
+        // Convert LocalDateTime to milliseconds since epoch
+        return eventDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+
+    private LocalTime calculateNotificationTime(LocalTime startTime, String notificationString) {
+        LocalTime notificationTime = startTime;
+
+        switch (notificationString) {
+            case "10 minutes before":
+                notificationTime = startTime.minusMinutes(10);
+                break;
+            case "30 minutes before":
+                notificationTime = startTime.minusMinutes(30);
+                break;
+            case "1 hour before":
+                notificationTime = startTime.minusHours(1);
+                break;
+            case "1 day before":
+                notificationTime = startTime.minusHours(24);
+                break;
+            case "None":
+                // Default to event start time if no notification needed
+                notificationTime = startTime;
+                break;
+            default:
+                // Handle unexpected case here; default to no notification
+                notificationTime = startTime;
+                break;
+        }
+
+        return notificationTime;
+    }
+
 
     private void setupNotificationOptions() {
         lin_addNotif.setOnClickListener(new View.OnClickListener() {

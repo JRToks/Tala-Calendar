@@ -12,13 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -26,12 +19,14 @@ public class CalendarAdapter extends RecyclerView.Adapter <CalendarViewHolder> {
     private final Context context;
     private final ArrayList<LocalDate> days;
     private final OnItemListener onItemListener;
+    private final DBHelper db;
     private final String userId;
 
     public CalendarAdapter(Context context, String userId, ArrayList<LocalDate> days, OnItemListener onItemListener) {
         this.days = days;
         this.onItemListener = onItemListener;
         this.context = context;
+        this.db = new DBHelper(context);
         this.userId = userId;
     }
 
@@ -52,32 +47,33 @@ public class CalendarAdapter extends RecyclerView.Adapter <CalendarViewHolder> {
     public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {//looping
         final LocalDate date = days.get(position);
         holder.dayOfMonth.setText(String.valueOf(date.getDayOfMonth()));
+        boolean eventExists = db.checkCalendarEventExists(userId, date);
 
-        checkCalendarEventExists(userId, date, eventExists -> {
-            if (date.equals(CalendarUtils.selectedDate)) {
-                if (date.equals(LocalDate.now())) {
-                    holder.itemView.setBackgroundResource(R.drawable.calendar_today_bg);
-                    holder.dayOfMonth.setTextColor(Color.WHITE);
-                } else {
-                    holder.parentView.setBackgroundResource(R.drawable.calendar_selected_bg);
-                }
-            } else if (date.equals(LocalDate.now())) {
-                int colorMainDarkCyan = ContextCompat.getColor(context, R.color.color_main_darkcyan);
-                holder.dayOfMonth.setTextColor(colorMainDarkCyan);
-            }
-
-            if (!date.getMonth().equals(CalendarUtils.selectedDate.getMonth())) {
-                holder.dayOfMonth.setTextColor(Color.LTGRAY);
-            }
-
-            if (eventExists && date.getMonth().equals(CalendarUtils.selectedDate.getMonth()) &&
-                    !date.equals(CalendarUtils.selectedDate)) {
-                holder.cellDotView.setVisibility(View.VISIBLE);
+        if (date.equals(CalendarUtils.selectedDate)) {
+            if (date.equals(LocalDate.now())) {
+                holder.itemView.setBackgroundResource(R.drawable.calendar_today_bg);
+                holder.dayOfMonth.setTextColor(Color.WHITE);
             } else {
-                holder.cellDotView.setVisibility(View.GONE);
+                holder.parentView.setBackgroundResource(R.drawable.calendar_selected_bg);
             }
-        });
+        } else if (date.equals(LocalDate.now())) {
+            int colorMainDarkCyan = ContextCompat.getColor(context, R.color.color_main_darkcyan);
+            holder.dayOfMonth.setTextColor(colorMainDarkCyan);
+        }
+
+        if (!date.getMonth().equals(CalendarUtils.selectedDate.getMonth())) {
+            holder.dayOfMonth.setTextColor(Color.LTGRAY);
+        }
+
+        if (eventExists && date.getMonth().equals(CalendarUtils.selectedDate.getMonth()) &&
+                !date.equals(CalendarUtils.selectedDate)) {
+            holder.cellDotView.setVisibility(View.VISIBLE);
+        } else {
+            holder.cellDotView.setVisibility(View.GONE);
+        }
+        db.close();
     }
+
 
     @Override
     public int getItemCount() {
@@ -85,41 +81,7 @@ public class CalendarAdapter extends RecyclerView.Adapter <CalendarViewHolder> {
     }
 
     public interface OnItemListener {
-        void onItemClick(int position, LocalDate date);
-    }
+        void onItemclick(int position, LocalDate date);
 
-    private void checkCalendarEventExists(String userId, LocalDate date, OnEventCheckListener listener) {
-        DatabaseReference eventsRef = FirebaseDatabase.getInstance().getReference("events");
-
-        Query query = eventsRef.orderByChild("uid").equalTo(userId);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                boolean eventExists = false;
-                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
-                    String startDate = eventSnapshot.child("startDate").getValue(String.class);
-                    String endDate = eventSnapshot.child("endDate").getValue(String.class);
-                    if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
-                        LocalDate eventStartDate = LocalDate.parse(startDate);
-                        LocalDate eventEndDate = LocalDate.parse(endDate);
-                        if ((date.isEqual(eventStartDate) || date.isEqual(eventEndDate)) ||
-                                (date.isAfter(eventStartDate) && date.isBefore(eventEndDate))) {
-                            eventExists = true;
-                            break;
-                        }
-                    }
-                }
-                listener.onEventCheckCompleted(eventExists);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                listener.onEventCheckCompleted(false);
-            }
-        });
-    }
-
-    public interface OnEventCheckListener {
-        void onEventCheckCompleted(boolean eventExists);
     }
 }
