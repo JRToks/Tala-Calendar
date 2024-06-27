@@ -198,22 +198,4 @@
         android:text="Login to your account"
         android:textColor="#CCB5B5B5" />
 
-    <TextView
-        android:id="@+id/textView_connect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/rel_login"
-        android:layout_centerHorizontal="true"
-        android:text="Or sign in with"
-        android:textColor="@color/black" />
-
-    <ImageView
-        android:id="@+id/google_Btn"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_below="@id/textView_connect"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:clickable="true"
-        app:srcCompat="@drawable/google" />
 </RelativeLayout>

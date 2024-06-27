@@ -19,36 +19,35 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class ActivityMain extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-    private DBHelper db;
+    private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
     private SessionManager sessionManager;
     private FragmentManager fragmentManager;
     private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
-    private FloatingActionButton add_btn, add_cal, talk_ai;
     private FABHandler FAB;
-    private NavigationView navigationView;
-    private View headerView, dimView;
-    private TextView textViewUsername, textViewEmail;
-    private int userId;
+    private String userId, rememberMe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        decorView.setSystemUiVisibility(uiOptions);
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
-        userId = getIntent().getIntExtra("userId", -1);
-        toolbar = findViewById(R.id.toolbar);
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
+        rememberMe = getIntent().getStringExtra("rememberMe");
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
 
@@ -59,13 +58,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
 
         sessionManager = new SessionManager(ActivityMain.this);
-        db = new DBHelper(this);
         FAB = new FABHandler(this);
 
-        if (userId != -1 || sessionManager.isLoggedIn()){ //is set to if not null so database checks wouldnt return error
-            if (userId == -1){
-                userId = sessionManager.getSession(); //get userId from session if userId is null but isLoggedin which indicates userId is present but not stored
-            }
+        if (currentUser != null ){
+            userId = currentUser.getUid();
             fragmentManager = getSupportFragmentManager();
             CalendarUtils.selectedDate = (LocalDate) LocalDate.now();
             openFragment(new MonthFragment(userId));
@@ -79,8 +75,11 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         super.onStart();
 
-        boolean isLoggedin = sessionManager.isLoggedIn();
-        if (!isLoggedin && userId == -1){ // TODO: 26/02/2024 change loginactivity.class to whatever class is the login and register page is
+        boolean isLoggedIn = sessionManager.isLoggedIn();
+        if (!isLoggedIn && rememberMe == null){ // if current user is null it means no user is logged in
+            if (currentUser != null){
+                mAuth.signOut();
+            }
             Intent i = new Intent(ActivityMain.this, ActivityLogin.class);
             startActivity(i);
             finish();
@@ -88,23 +87,23 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     }
 
     private void setNavHeaders() {
-        navigationView = findViewById(R.id.nav_drawer);
+        NavigationView navigationView = findViewById(R.id.nav_drawer);
         navigationView.setNavigationItemSelectedListener(this);
 
-        headerView = navigationView.getHeaderView(0);
+        View headerView = navigationView.getHeaderView(0);
 
-        textViewUsername = headerView.findViewById(R.id.nav_username);
-        textViewEmail = headerView.findViewById(R.id.nav_email);
+        TextView textViewUsername = headerView.findViewById(R.id.nav_username);
+        TextView textViewEmail = headerView.findViewById(R.id.nav_email);
 
-        textViewUsername.setText(db.getUsername(userId));
-        textViewEmail.setText(db.getEmail(userId));
+        textViewUsername.setText(currentUser.getDisplayName());
+        textViewEmail.setText(currentUser.getEmail());
     }
 
     private void setupBtnClickListeners() {
-        add_btn = findViewById(R.id.add_btn);
-        add_cal = findViewById(R.id.event_shortcut_btn);
-        talk_ai = findViewById(R.id.talk_ai_btn);
-        dimView = findViewById(R.id.dimView);
+        FloatingActionButton add_btn = findViewById(R.id.add_btn);
+        FloatingActionButton add_cal = findViewById(R.id.event_shortcut_btn);
+        FloatingActionButton talk_ai = findViewById(R.id.talk_ai_btn);
+        View dimView = findViewById(R.id.dimView);
         add_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,7 +115,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 FAB.onButtonClicked();
                 Intent intent = new Intent(ActivityMain.this, ActivityEventAdd.class);
-                intent.putExtra("userId", userId);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_up_anim,0);
             }
@@ -126,7 +124,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 FAB.onButtonClicked();
                 Intent intent = new Intent(ActivityMain.this, ActivityAI.class);
-                intent.putExtra("userId", userId);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_up_anim,0);
             }
@@ -147,15 +144,12 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             openFragment(new MonthFragment(userId));
         } else if (itemId == R.id.day_view) {
             openFragment(new DayFragment(userId));
-        }
-//        else if (itemId == R.id.schedule_view) {
-//            openFragment(new ScheduleFragment(userId));
-//        }
-        else if (itemId == R.id.about_us) {
+        } else if (itemId == R.id.about_us) {
             Intent intent = new Intent(ActivityMain.this, ActivityAboutUs.class);
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_left,0);
         } else if (itemId == R.id.logout_btn) {
+            mAuth.signOut();
             sessionManager.removeSession();
             Intent i = new Intent(ActivityMain.this, ActivityLogin.class);
             i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

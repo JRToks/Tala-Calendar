@@ -26,13 +26,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class DayFragment extends Fragment implements CalendarAdapter.OnItemListener{
+public class DayFragment extends Fragment implements CalendarAdapter.OnItemListener {
     private TextView monthYearText;
     private RecyclerView calendarRecyclerView;
     private ListView hourListView;
-    private DBHelper db;
-    private final int userId;
+    private final String userId;
     private View view;
+
+    public DayFragment(String userId) {
+        this.userId = userId;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,12 +48,7 @@ public class DayFragment extends Fragment implements CalendarAdapter.OnItemListe
         return view;
     }
 
-    public DayFragment(int userId) {
-        this.userId = userId;
-    }
-
-    private void initWidgets()
-    {
+    private void initWidgets() {
         hourListView = (ListView) view.findViewById(R.id.hourListView);
         calendarRecyclerView = (RecyclerView) view.findViewById(R.id.calendarDayRecyclerView);
         monthYearText = (TextView) view.findViewById(R.id.tv_daymonthYear);
@@ -68,21 +66,61 @@ public class DayFragment extends Fragment implements CalendarAdapter.OnItemListe
     }
 
     private void setHourAdapter() {
-        HourAdapter hourAdapter = new HourAdapter(getContext(), hourEventList());
-        hourListView.setAdapter(hourAdapter);
+        fetchHourEvents(new HourEventsCallback() {
+            @Override
+            public void onHourEventsFetched(List<HourEvent> hourEvents) {
+                HourAdapter hourAdapter = new HourAdapter(getContext(), hourEvents);
+                hourListView.setAdapter(hourAdapter);
+            }
+        });
+    }
+
+    private void fetchHourEvents(HourEventsCallback callback) {
+        ArrayList<HourEvent> list = new ArrayList<>();
+
+        for (int hour = 0; hour < 24; hour++) {
+            LocalTime time = LocalTime.of(hour, 0);
+            Event.eventsForDateAndTime(userId, selectedDate, time, new Event.OnEventsFetchedListener() {
+                @Override
+                public void onEventsFetched(ArrayList<Event> events) {
+                    HourEvent hourEvent = new HourEvent(userId, time, events);
+                    list.add(hourEvent);
+
+                    if (list.size() == 24) {
+                        callback.onHourEventsFetched(list);
+                    }
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    interface HourEventsCallback {
+        void onHourEventsFetched(List<HourEvent> hourEvents);
     }
 
     private List<HourEvent> hourEventList() {
         ArrayList<HourEvent> list = new ArrayList<>();
-        db = new DBHelper(getContext());
-        for(int hour = 0; hour < 24; hour++){
-            LocalTime time = LocalTime.of(hour, 0);
-            ArrayList<Event> events = Event.eventsForDateAndTime(db, userId, selectedDate, time);
 
-            HourEvent hourEvent = new HourEvent(userId, time, events);
-            list.add(hourEvent);
+        for (int hour = 0; hour < 24; hour++) {
+            LocalTime time = LocalTime.of(hour, 0);
+            Event.eventsForDateAndTime(userId, selectedDate, time, new Event.OnEventsFetchedListener() {
+                @Override
+                public void onEventsFetched(ArrayList<Event> events) {
+                    HourEvent hourEvent = new HourEvent(userId, time, events);
+                    list.add(hourEvent);
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
-        db.close();
 
         return list;
     }
@@ -104,7 +142,6 @@ public class DayFragment extends Fragment implements CalendarAdapter.OnItemListe
                 nextWeekAction();
             }
         });
-
     }
 
     public void previousWeekAction() {
@@ -118,59 +155,65 @@ public class DayFragment extends Fragment implements CalendarAdapter.OnItemListe
     }
 
     @Override
-    public void onItemclick(int position, LocalDate date) {
+    public void onItemClick(int position, LocalDate date) {
         selectedDate = date;
         setWeekView();
     }
 
     private void setAllDayEvents() {
+        TextView event1 = view.findViewById(R.id.allday_event1);
+        TextView event2 = view.findViewById(R.id.allday_event2);
+        TextView event3 = view.findViewById(R.id.allday_event3);
 
-        TextView event1= view.findViewById(R.id.allday_event1);
-        TextView event2= view.findViewById(R.id.allday_event2);
-        TextView event3= view.findViewById(R.id.allday_event3);
+        Event.eventsForDate(userId, selectedDate, new Event.OnEventsFetchedListener() {
+            @Override
+            public void onEventsFetched(ArrayList<Event> events) {
+                ArrayList<Event> allDayEvents = new ArrayList<>();
+                for (Event event : events) {
+                    if (!selectedDate.toString().equals(event.getEndDate()) || !selectedDate.toString().equals(event.getStartDate())) {
+                        allDayEvents.add(event);
+                    }
+                }
+                if (allDayEvents.size() == 0) {
+                    hideEvent(event1);
+                    hideEvent(event2);
+                    hideEvent(event3);
+                } else {
+                    if (allDayEvents.size() == 1) {
+                        setEvent(event1, allDayEvents.get(0));
+                        hideEvent(event2);
+                        hideEvent(event3);
+                    } else if (allDayEvents.size() == 2) {
+                        setEvent(event1, allDayEvents.get(0));
+                        setEvent(event2, allDayEvents.get(1));
+                        hideEvent(event3);
+                    } else if (allDayEvents.size() == 3) {
+                        setEvent(event1, allDayEvents.get(0));
+                        setEvent(event2, allDayEvents.get(1));
+                        setEvent(event3, allDayEvents.get(2));
+                    } else {
+                        setEvent(event1, allDayEvents.get(0));
+                        setEvent(event2, allDayEvents.get(1));
+                        event3.setVisibility(View.VISIBLE);
+                        String eventsNotShown = String.valueOf(allDayEvents.size() - 2);
+                        eventsNotShown += " More Event/s";
+                        event3.setText(eventsNotShown);
+                    }
+                }
+            }
 
-        db = new DBHelper(getContext());
-        ArrayList<Event> allDayEvents = new ArrayList<>();
-        ArrayList<Event> events = Event.eventsForDate(db,userId,selectedDate);
-        db.close();
-        for (Event event: events){
-            if (!String.valueOf(selectedDate).equals(event.getEndDate()) || !String.valueOf(selectedDate).equals(event.getStartDate())){
-                allDayEvents.add(event);
+            @Override
+            public void onError(Exception e) {
+                e.printStackTrace();
             }
-        }
-        if (allDayEvents.size() == 0){
-            hideEvent(event1);
-            hideEvent(event2);
-            hideEvent(event3);
-        }else{
-            if(allDayEvents.size() == 1){
-                setEvent(event1, allDayEvents.get(0));
-                hideEvent(event2);
-                hideEvent(event3);
-            } else if(allDayEvents.size() == 2){
-                setEvent(event1, allDayEvents.get(0));
-                setEvent(event2, allDayEvents.get(1));
-                hideEvent(event3);
-            } else if(allDayEvents.size() == 3){
-                setEvent(event1, allDayEvents.get(0));
-                setEvent(event2, allDayEvents.get(1));
-                setEvent(event3, allDayEvents.get(2));
-            } else {
-                setEvent(event1, allDayEvents.get(0));
-                setEvent(event2, allDayEvents.get(1));
-                event3.setVisibility(View.VISIBLE);
-                String eventsNotShown = String.valueOf(allDayEvents.size() - 2);
-                eventsNotShown += " More Event/s";
-                event3.setText(eventsNotShown);
-            }
-        }
+        });
     }
 
     private void setEvent(TextView textView, Event event) {
-        if (!Objects.equals(event.getColor(), "Default Color")){
+        if (!Objects.equals(event.getColor(), "Default color")) {
             textView.setBackgroundColor(ContextCompat.getColor(requireContext(), getResources().getIdentifier(event.getColor(), "color", requireContext().getPackageName())));
         }
-        textView.setText(event.getName().isEmpty() ? "(No title)" : event.getName());
+        textView.setText(event.getTitle().isEmpty() ? "(No title)" : event.getTitle());
         textView.setVisibility(View.VISIBLE);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,7 +224,7 @@ public class DayFragment extends Fragment implements CalendarAdapter.OnItemListe
                 if (getContext() instanceof Activity) {
                     Activity activity = (Activity) getContext();
                     activity.startActivity(intent);
-                    activity.overridePendingTransition(R.anim.slide_up_anim,0);
+                    activity.overridePendingTransition(R.anim.slide_up_anim, 0);
                 } else {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     getContext().startActivity(intent);

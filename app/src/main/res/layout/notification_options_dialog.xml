@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"> <!-- Apply custom background -->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose Notification"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp" /> <!-- Added TextView for title -->
+
+    <RadioGroup
+        android:id="@+id/notificationOptionsRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"> <!-- Added bottom margin for spacing -->
+
+        <RadioButton
+            android:id="@+id/optionNone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="None" />
+
+        <RadioButton
+            android:id="@+id/option10MinutesBefore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10 minutes before" />
+
+        <RadioButton
+            android:id="@+id/option30MinutesBefore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="30 minutes before" />
+
+        <RadioButton
+            android:id="@+id/option1HourBefore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 hour before" />
+
+        <RadioButton
+            android:id="@+id/option1dayBefore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 day before" />
+    </RadioGroup>
+
+</LinearLayout>

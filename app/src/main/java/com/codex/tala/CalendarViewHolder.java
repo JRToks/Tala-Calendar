@@ -27,6 +27,6 @@ public class CalendarViewHolder extends RecyclerView.ViewHolder implements View.
 
     @Override
     public void onClick(View v) {
-        onItemListener.onItemclick(getAdapterPosition(), days.get(getAdapterPosition()));
+        onItemListener.onItemClick(getAdapterPosition(), days.get(getAdapterPosition()));
     }
 }

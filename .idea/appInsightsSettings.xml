@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.codex.tala" />
+                  <option name="mobileSdkAppId" value="1:405125040530:android:37129662b3abe3e8df194b" />
+                  <option name="projectId" value="tala-3a1fc" />
+                  <option name="projectNumber" value="405125040530" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

@@ -6,19 +6,19 @@ import java.util.ArrayList;
 public class HourEvent {
     private LocalTime time;
     private final ArrayList<Event> events;
-    private int userId;
+    private String userId;
 
-    public HourEvent(int userId, LocalTime time, ArrayList<Event> events){
+    public HourEvent(String userId, LocalTime time, ArrayList<Event> events){
         this.userId = userId;
         this.time = time;
         this.events = events;
     }
 
-    public int getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

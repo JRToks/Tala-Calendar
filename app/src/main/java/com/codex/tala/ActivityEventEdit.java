@@ -3,12 +3,14 @@ package com.codex.tala;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -20,13 +22,18 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.Firebase;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -35,9 +42,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
-public class ActivityEventAdd extends AppCompatActivity {
+public class ActivityEventEdit extends AppCompatActivity {
     private LinearLayout changeColor, lin_addNotif, lin_DNR;
     private ImageView circleColor;
     private EditText eventNameET, descriptionET;
@@ -45,50 +53,50 @@ public class ActivityEventAdd extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener mStartDateSetListener, mEndDateSetListener;
     private LocalDate startDateVal, endDateVal;
     private int year, month, day;
-    private String userId;
-    private FirebaseAuth mAuth;
-    private FirebaseUser currentUser;
-    private FirebaseDatabase database;
+    private String eventid;
     private DatabaseReference  eventRef;
-
     @Override
-    public void onCreate (Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_event);
+        setContentView(R.layout.activity_edit_event);
 
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
-        mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
-        database = FirebaseDatabase.getInstance();
-        eventRef = database.getReference("events");
 
-        userId = currentUser.getUid();
+        eventid = getIntent().getStringExtra("eventId");
+        if (eventid == null) {
+            finish();
+            return;
+        }
+
+        eventRef = FirebaseDatabase.getInstance().getReference("events").child(eventid);
 
         startDateVal = endDateVal = CalendarUtils.selectedDate;
         year = startDateVal.getYear();
         month = startDateVal.getMonthValue()-1;
         day = startDateVal.getDayOfMonth();
 
-        notificationTv = findViewById(R.id.notificationTv);
-        repeatTv = findViewById(R.id.repeatTv);
-        changeColor = findViewById(R.id.lin_changeColor);
-        lin_addNotif = findViewById(R.id.lin_addNotif);
-        lin_DNR = findViewById(R.id.lin_DNR);
-        circleColor = findViewById(R.id.circleColor);
-        colorNameTv = findViewById(R.id.colorNameTV);
-        eventNameET = findViewById(R.id.eventNameET);
-        dateStartTv = (TextView) findViewById(R.id.dateStartTv);
-        dateEndTv = (TextView) findViewById(R.id.dateEndTv);
-        timeStartTv = (TextView) findViewById(R.id.timeStartTv);
-        timeEndTv = (TextView) findViewById(R.id.timeEndTv);
-        descriptionET = (EditText) findViewById(R.id.descriptionET);
+        notificationTv = findViewById(R.id.EE_notificationTv);
+        repeatTv = findViewById(R.id.EE_repeatTv);
+        changeColor = findViewById(R.id.EE_lin_changeColor);
+        lin_addNotif = findViewById(R.id.EE_lin_addNotif);
+        lin_DNR = findViewById(R.id.EE_lin_DNR);
+        circleColor = findViewById(R.id.EE_circleColor);
+        colorNameTv = findViewById(R.id.EE_colorNameTV);
+        eventNameET = findViewById(R.id.EE_eventNameET);
+        eventNameET.requestFocus();
+        dateStartTv = (TextView) findViewById(R.id.EE_dateStartTv);
+        dateEndTv = (TextView) findViewById(R.id.EE_dateEndTv);
+        timeStartTv = (TextView) findViewById(R.id.EE_timeStartTv);
+        timeEndTv = (TextView) findViewById(R.id.EE_timeEndTv);
+        descriptionET = (EditText) findViewById(R.id.EE_descriptionET);
 
-        Button cancelBtn = (Button) findViewById(R.id.cancel_btn);
-        Button addBtn = (Button) findViewById(R.id.add_btn_event);
+        Button cancelBtn = (Button) findViewById(R.id.EE_cancel_btn);
+        Button saveBtn = (Button) findViewById(R.id.EE_save_btn_event);
 
+        setEventDetails();
         setTextDate();
         setTextStart();
         setTextEnd();
@@ -100,41 +108,12 @@ public class ActivityEventAdd extends AppCompatActivity {
         setupRepeatOptions();
         setupNotificationOptions();
 
-        addBtn.setOnClickListener(new View.OnClickListener() {
+        saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String eventName = eventNameET.getText().toString();
-                String startTime = timeStartTv.getText().toString();
-                String endTime = timeEndTv.getText().toString();
-                String notif = notificationTv.getText().toString();
-                String recurr = repeatTv.getText().toString();
-                String color = colorNameTv.getText().toString();
-                String description = descriptionET.getText().toString();
-
-                LocalTime sT = LocalTime.parse(CalendarUtils.convert12to24(startTime));
-                LocalTime eT = LocalTime.parse(CalendarUtils.convert12to24(endTime));
-                if (startDateVal.isAfter(endDateVal) || (sT.isAfter(eT) && startDateVal.isEqual(endDateVal))){
-                    Toast.makeText(ActivityEventAdd.this, "The event end time cannot be set before the start time.", Toast.LENGTH_SHORT).show();
-                    dateEndTv.setTextColor(Color.RED);
-                    timeEndTv.setTextColor(Color.RED);
-                }else{
-                    HashMap<String, Object> eventData = new HashMap<>();
-                    eventData.put("uid", userId);
-                    eventData.put("title", eventName);
-                    eventData.put("startDate", startDateVal.toString());
-                    eventData.put("endDate", endDateVal.toString());
-                    eventData.put("startTime", startTime);
-                    eventData.put("endTime", endTime);
-                    eventData.put("recurring", recurr);
-                    eventData.put("notification", notif);
-                    eventData.put("color", color);
-                    eventData.put("description", description);
-
-                    eventRef.push().setValue(eventData);
-                    finish();
-                    overridePendingTransition(0, R.anim.slide_down_anim);
-                }
+                saveEvent();
             }
+
         });
 
         cancelBtn.setOnClickListener(new View.OnClickListener() {
@@ -146,11 +125,122 @@ public class ActivityEventAdd extends AppCompatActivity {
         });
     }
 
+    private void setEventDetails() {
+        eventRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String titleCheck = snapshot.child("title").getValue(String.class);
+                    if (titleCheck == null || titleCheck.isEmpty()) titleCheck = "(No title)";
+                    eventNameET.setText(titleCheck);
+
+                    String descCheck = snapshot.child("description").getValue(String.class);
+                    if (descCheck == null || descCheck.isEmpty()) descCheck = "Add description";
+                    descriptionET.setText(descCheck);
+
+                    String rpt = snapshot.child("recurring").getValue(String.class);
+                    if (rpt != null) repeatTv.setText(rpt);
+
+                    String notif = snapshot.child("notification").getValue(String.class);
+                    if (notif != null && !notif.isEmpty()) notificationTv.setText(notif);
+
+                    String color = snapshot.child("color").getValue(String.class);
+                    Map<String, Integer> colorMap = new HashMap<>();
+                    colorMap.put("Tomato", R.drawable.color_circle_red);
+                    colorMap.put("Tangerine", R.drawable.color_circle_orange);
+                    colorMap.put("Banana", R.drawable.color_circle_yellow);
+                    colorMap.put("Basil", R.drawable.color_circle_green);
+                    colorMap.put("Flamingo", R.drawable.color_circle_flamingo);
+                    colorMap.put("Graphite", R.drawable.color_circle_gray);
+                    colorMap.put("Grape", R.drawable.color_circle_purple);
+
+                    Integer colorResourceId = colorMap.get(color);
+                    if (colorResourceId != null) {
+                        circleColor.setImageResource(colorResourceId);
+                        colorNameTv.setText(color);
+                    }
+
+                    String startDateStr = snapshot.child("startDate").getValue(String.class);
+                    if (startDateStr != null) {
+                        startDateVal = LocalDate.parse(startDateStr);
+                        String formattedStartDate = CalendarUtils.convertDateFormat(startDateStr);
+                        dateStartTv.setText(formattedStartDate);
+                    }
+
+                    String endDateStr = snapshot.child("endDate").getValue(String.class);
+                    if (endDateStr != null) {
+                        endDateVal = LocalDate.parse(endDateStr);
+                        String formattedEndDate = CalendarUtils.convertDateFormat(endDateStr);
+                        dateEndTv.setText(formattedEndDate);
+                    }
+
+                    String startTimeStr = snapshot.child("startTime").getValue(String.class);
+                    if (startTimeStr != null) timeStartTv.setText(startTimeStr);
+
+                    String endTimeStr = snapshot.child("endTime").getValue(String.class);
+                    if (endTimeStr != null) timeEndTv.setText(endTimeStr);
+
+                    dateStartTv.setText(CalendarUtils.convertDateFormat(startDateStr));
+                    dateEndTv.setText(CalendarUtils.convertDateFormat(endDateStr));
+                } else {
+                    Toast.makeText(ActivityEventEdit.this, "Event not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(ActivityEventEdit.this, "Failed to fetch event details", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void saveEvent() {
+        String eventName = eventNameET.getText().toString();
+        String startTime = timeStartTv.getText().toString();
+        String endTime = timeEndTv.getText().toString();
+        String notif = notificationTv.getText().toString();
+        String recurr = repeatTv.getText().toString();
+        String color = colorNameTv.getText().toString();
+        String description = descriptionET.getText().toString();
+
+        LocalTime sT = LocalTime.parse(CalendarUtils.convert12to24(startTime));
+        LocalTime eT = LocalTime.parse(CalendarUtils.convert12to24(endTime));
+        if (startDateVal.isAfter(endDateVal) || (sT.isAfter(eT) && startDateVal.isEqual(endDateVal))) {
+            Toast.makeText(ActivityEventEdit.this, "The event end time cannot be set before the start time.", Toast.LENGTH_SHORT).show();
+            dateEndTv.setTextColor(Color.RED);
+            timeEndTv.setTextColor(Color.RED);
+        } else {
+            HashMap<String, Object> eventData = new HashMap<>();
+            eventData.put("title", eventName);
+            eventData.put("startDate", startDateVal.toString());
+            eventData.put("endDate", endDateVal.toString());
+            eventData.put("startTime", startTime);
+            eventData.put("endTime", endTime);
+            eventData.put("recurring", recurr);
+            eventData.put("notification", notif);
+            eventData.put("color", color);
+            eventData.put("description", description);
+
+            eventRef.updateChildren(eventData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(ActivityEventEdit.this, "Event updated successfully.", Toast.LENGTH_SHORT).show();
+                        finish();
+                        overridePendingTransition(0, R.anim.slide_down_anim);
+                    } else {
+                        Toast.makeText(ActivityEventEdit.this, "Failed to update event.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+
     private void setupNotificationOptions() {
         lin_addNotif.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEventAdd.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEventEdit.this);
                 LayoutInflater inflater = getLayoutInflater();
                 View dialogView = inflater.inflate(R.layout.notification_options_dialog, null);
                 builder.setView(dialogView);
@@ -184,7 +274,7 @@ public class ActivityEventAdd extends AppCompatActivity {
         lin_DNR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEventAdd.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEventEdit.this);
                 LayoutInflater inflater = getLayoutInflater();
                 View dialogView = inflater.inflate(R.layout.repeat_options_dialog, null);
                 builder.setView(dialogView);
@@ -212,7 +302,7 @@ public class ActivityEventAdd extends AppCompatActivity {
         changeColor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEventAdd.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEventEdit.this);
                 LayoutInflater inflater = getLayoutInflater();
                 View dialogView = inflater.inflate(R.layout.color_picker_dialog, null);
                 builder.setView(dialogView);
@@ -302,7 +392,7 @@ public class ActivityEventAdd extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 DatePickerDialog dialog = new DatePickerDialog(
-                        ActivityEventAdd.this,
+                        ActivityEventEdit.this,
                         mStartDateSetListener,
                         year, month, day);
 
@@ -331,7 +421,7 @@ public class ActivityEventAdd extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 DatePickerDialog dialog = new DatePickerDialog(
-                        ActivityEventAdd.this,
+                        ActivityEventEdit.this,
                         mEndDateSetListener,
                         year, month, day);
                 Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.WHITE));
@@ -361,7 +451,7 @@ public class ActivityEventAdd extends AppCompatActivity {
                 Calendar currentTime = Calendar.getInstance();
                 int currentHour = currentTime.get(Calendar.HOUR_OF_DAY);
                 int hourForDialog = currentHour + 1;
-                TimePickerDialog dialog = new TimePickerDialog(ActivityEventAdd.this, new TimePickerDialog.OnTimeSetListener() {
+                TimePickerDialog dialog = new TimePickerDialog(ActivityEventEdit.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hours, int minutes) {
                         Calendar calendar = Calendar.getInstance();
@@ -386,7 +476,7 @@ public class ActivityEventAdd extends AppCompatActivity {
                 Calendar currentTime = Calendar.getInstance();
                 int currentHour = currentTime.get(Calendar.HOUR_OF_DAY);
                 int hourForDialog = currentHour + 2;
-                TimePickerDialog dialog = new TimePickerDialog(ActivityEventAdd.this, new TimePickerDialog.OnTimeSetListener() {
+                TimePickerDialog dialog = new TimePickerDialog(ActivityEventEdit.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hours, int minutes) {
                         Calendar calendar = Calendar.getInstance();

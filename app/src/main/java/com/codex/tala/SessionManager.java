@@ -3,33 +3,35 @@ package com.codex.tala;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Objects;
+
 public class SessionManager {
     private final SharedPreferences pref;
     private final SharedPreferences.Editor editor;
     private static final String PREF_NAME = "session";
     private static final String SESSION_KEY = "session_user";
-    private static final int DEFAULT_USER_ID = -1;
+    private static final String DEFAULT_USER_ID = "";
 
     public SessionManager(Context context) {
         pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = pref.edit();
     }
 
-    public void saveSession(int userId) {
-        editor.putInt(SESSION_KEY, userId);
+    public void saveSession(String userId) {
+        editor.putString(SESSION_KEY, userId);
         editor.apply();
     }
 
-    public int getSession() {
-        return pref.getInt(SESSION_KEY, DEFAULT_USER_ID);
+    public String getSession() {
+        return pref.getString(SESSION_KEY, DEFAULT_USER_ID);
     }
 
     public boolean isLoggedIn() {
-        return getSession() != DEFAULT_USER_ID;
+        return !Objects.equals(getSession(), DEFAULT_USER_ID);
     }
 
     public void removeSession() {
-        editor.putInt(SESSION_KEY, DEFAULT_USER_ID);
+        editor.putString(SESSION_KEY, DEFAULT_USER_ID);
         editor.apply();
     }
 }

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "405125040530",
+    "firebase_url": "https://tala-3a1fc-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "tala-3a1fc",
+    "storage_bucket": "tala-3a1fc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405125040530:android:37129662b3abe3e8df194b",
+        "android_client_info": {
+          "package_name": "com.codex.tala"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405125040530-1j9uff8hr0225ovm6gef3gbf75jc2i5j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.codex.tala",
+            "certificate_hash": "0fd5d5bf6f26855af2d6546550cf80bdd115e177"
+          }
+        },
+        {
+          "client_id": "405125040530-fnds3t2k0ss6qfav9ododt9ho4k9o48h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfR2nAtq-CEHQwSQFKF8QmF-mBs9SqQiQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405125040530-fnds3t2k0ss6qfav9ododt9ho4k9o48h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

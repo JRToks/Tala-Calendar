@@ -20,11 +20,9 @@ public class ActivityLegalAgreements extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_legal_agreements);
 
-        View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        decorView.setSystemUiVisibility(uiOptions);
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
         acceptTerms = findViewById(R.id.checkbox_accept_terms);
         acceptPolicy = findViewById(R.id.checkbox_accept_policy);
